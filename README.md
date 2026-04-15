@@ -51,8 +51,8 @@ graph TD
 The easiest way to get started with full environment isolation.
 
 ```bash
-git clone https://github.com/guissii/rag-explorer.git
-cd rag-explorer
+git clone https://github.com/guissii/TraceRAG.git
+cd TraceRAG
 docker-compose up --build
 ```
 
