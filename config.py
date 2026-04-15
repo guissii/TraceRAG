@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     DEBUG: bool = True
     
     # Project Info
-    PROJECT_NAME: str = "RAG Deep-Dive Inspector"
+    PROJECT_NAME: str = "TraceRAG"
     VERSION: str = "1.0.0"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

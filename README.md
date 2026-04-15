@@ -1,17 +1,18 @@
-# 🧠 RAG Deep-Dive Inspector
+# 🧠 TraceRAG
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
 [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
 [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-blue)](https://ollama.com/)
 
-> **The ultimate educational dashboard for understanding Retrieval-Augmented Generation.** Stop the "black box" AI. Visualize every step of your RAG pipeline in real-time.
+> **The ultimate educational dashboard for tracing Retrieval-Augmented Generation.** Stop the "black box" AI. Visualize every step of your RAG pipeline in real-time.
 
 ---
 
 ## 🌟 Overview
 
-**RAG Deep-Dive Inspector** is a professional-grade, educational tool designed to demystify how RAG works. Instead of a simple chat interface, it provides a 4-stage analytical dashboard that traces data from ingestion to final inference.
+**TraceRAG** is a professional-grade, educational tool designed to demystify how RAG works. Instead of a simple chat interface, it provides a 4-stage analytical dashboard that traces data from ingestion to final inference.
+
 
 ### 🔬 Key Features
 - **01. Ingestion Layer**: Track text extraction, smart chunking, and token counts.
