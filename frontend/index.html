@@ -3,417 +3,1153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TraceRAG | Expert AI Inspector</title>
-
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
+    <title>TraceRAG v2.0 — Pipeline RAG Éducatif</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-deep: #020408;
-            --bg-surface: #0d1117;
-            --bg-card: #161b22;
-            --accent: #58a6ff;
-            --accent-purple: #bc8cff;
-            --accent-green: #3fb950;
-            --accent-orange: #d29922;
-            --accent-red: #f85149;
-            --border: #30363d;
-            --text-main: #c9d1d9;
-            --text-dim: #8b949e;
-            --code-bg: #010409;
+            --bg-main: #0a0a0f;
+            --bg-sidebar: #0f0f16;
+            --bg-card: rgba(26, 26, 46, 0.6);
+            --bg-card-hover: rgba(36, 36, 66, 0.8);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-highlight: rgba(99, 102, 241, 0.5);
+            --accent: #6366f1;
+            --accent-hover: #4f46e5;
+            --accent-glow: rgba(99, 102, 241, 0.3);
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --radius: 12px;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', sans-serif; background: var(--bg-deep); color: var(--text-main); height: 100vh; overflow: hidden; }
 
-        .expert-layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+        }
 
-        /* Sidebar Pro */
-        .sidebar { background: var(--bg-surface); border-right: 1px solid var(--border); padding: 24px; display: flex; flex-direction: column; gap: 40px; }
-        .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--accent), var(--accent-purple)); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 800; color: white; }
-        .nav-menu { list-style: none; display: flex; flex-direction: column; gap: 8px; }
-        .nav-link { padding: 12px 16px; border-radius: 8px; cursor: pointer; transition: 0.2s; color: var(--text-dim); display: flex; align-items: center; gap: 12px; font-weight: 600; font-size: 13px; border: 1px solid transparent; }
-        .nav-link:hover { background: rgba(255,255,255,0.03); color: var(--text-main); }
-        .nav-link.active { background: rgba(88, 166, 255, 0.1); color: var(--accent); border-color: rgba(88, 166, 255, 0.2); }
+        h1, h2, h3, .brand { font-family: 'Space Grotesk', sans-serif; }
+        code, .mono { font-family: 'JetBrains Mono', monospace; }
 
-        /* Inspector Content */
-        .inspector-panel { overflow-y: auto; padding: 40px; position: relative; scroll-behavior: smooth; }
-        .stage-view { display: none; flex-direction: column; gap: 32px; animation: fadeIn 0.3s ease-out; }
-        .stage-view.active { display: flex; }
+        /* SIDEBAR */
+        .sidebar {
+            width: 260px;
+            background: var(--bg-sidebar);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .brand {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .brand h1 {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .brand span { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+        .nav-section { padding: 16px 12px; border-bottom: 1px solid var(--border); }
+        .nav-title { font-size: 10px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.1em; padding: 0 8px 8px; }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: all 0.2s;
+            margin-bottom: 2px;
+            position: relative;
+        }
+
+        .nav-item:hover { background: var(--bg-card); color: var(--text-main); }
+        .nav-item.active { background: var(--accent-glow); color: var(--text-main); border: 1px solid var(--border-highlight); }
+        
+        .nav-badge {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            background: rgba(255,255,255,0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Space Grotesk', sans-serif;
+            font-size: 11px;
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+        }
+        .nav-item.active .nav-badge { background: var(--accent); color: white; border-color: var(--accent); }
+        .nav-item.done .nav-badge { background: rgba(16, 185, 129, 0.2); color: var(--success); border-color: var(--success); }
+
+        .system-status { padding: 20px; font-size: 11px; color: var(--text-muted); margin-top: auto; }
+        .status-row { display: flex; justify-content: space-between; margin-bottom: 8px; align-items: center; }
+        .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--success); display: inline-block; margin-right: 6px; box-shadow: 0 0 6px var(--success); }
+
+        /* MAIN CONTENT */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
+            background: radial-gradient(circle at top right, rgba(99, 102, 241, 0.05), transparent 40%);
+        }
+
+        .view { display: none; padding: 40px 60px; max-width: 1100px; margin: 0 auto; animation: fadeIn 0.3s ease; }
+        .view.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* Stage Header */
-        .stage-header { border-bottom: 1px solid var(--border); padding-bottom: 24px; }
-        .stage-title { font-size: 24px; font-weight: 800; color: white; margin-bottom: 4px; }
-        .stage-meta { font-family: 'Fira Code', monospace; font-size: 11px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; }
+        .page-header { margin-bottom: 32px; }
+        .tag { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; display: inline-block; padding: 4px 10px; background: var(--accent-glow); border-radius: 20px; border: 1px solid var(--border-highlight); }
+        .page-header h2 { font-size: 28px; font-weight: 700; margin-bottom: 12px; color: #fff; }
+        .page-header p { font-size: 14px; color: var(--text-muted); max-width: 600px; line-height: 1.6; }
 
-        /* Expert Cards */
-        .data-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
-        .data-header { padding: 12px 20px; background: rgba(255,255,255,0.03); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-size: 11px; font-weight: 700; color: var(--text-dim); text-transform: uppercase; letter-spacing: 0.5px; }
-        .data-body { padding: 20px; }
+        /* CARDS */
+        .glass-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            transition: border-color 0.3s, transform 0.3s;
+        }
 
-        /* Chunk Grid */
-        .chunk-matrix { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
-        .chunk-unit { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'Fira Code', monospace; font-size: 11px; line-height: 1.5; position: relative; transition: 0.2s; max-height: 200px; overflow: hidden; }
-        .chunk-unit:hover { border-color: var(--accent); }
-        .chunk-tag { position: absolute; top: 8px; right: 12px; font-size: 9px; color: var(--accent-orange); font-weight: 800; background: rgba(210, 153, 34, 0.1); padding: 2px 6px; border-radius: 4px; }
-
-        /* Tables */
-        .expert-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        .expert-table th { text-align: left; padding: 12px 16px; color: var(--text-dim); font-size: 11px; border-bottom: 1px solid var(--border); }
-        .expert-table td { padding: 16px; border-bottom: 1px solid var(--border); vertical-align: top; }
-        .expert-table tr:hover { background: rgba(255,255,255,0.02); }
-
-        /* Utils */
-        .score-pill { padding: 4px 10px; border-radius: 20px; font-weight: 800; font-size: 11px; font-family: 'Fira Code', monospace; }
-        .score-high { background: rgba(63, 185, 80, 0.15); color: var(--accent-green); }
-        .score-mid { background: rgba(210, 153, 34, 0.15); color: var(--accent-orange); }
+        .glass-card:hover { border-color: rgba(255,255,255,0.2); }
+        .card-title { font-size: 14px; font-weight: 600; color: #fff; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; }
         
-        .btn-delete { color: var(--accent-red); cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 11px; border: 1px solid transparent; transition: 0.2s; }
-        .btn-delete:hover { background: rgba(248, 81, 73, 0.1); border-color: var(--accent-red); }
+        .badge { font-size: 10px; font-weight: 500; font-family: 'Inter'; padding: 4px 10px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); border-radius: 20px; color: var(--text-muted); }
 
-        .code-inspector { background: var(--code-bg); color: #adbac7; padding: 20px; border-radius: 8px; font-family: 'Fira Code', monospace; font-size: 12px; line-height: 1.6; border: 1px solid var(--border); white-space: pre-wrap; word-break: break-all; }
-        .vector-visual { display: flex; gap: 4px; margin-top: 12px; }
-        .vector-bar { height: 16px; background: var(--accent); border-radius: 2px; transition: 0.3s; }
+        /* INFO BOX */
+        .info-box {
+            background: rgba(99, 102, 241, 0.05);
+            border-left: 3px solid var(--accent);
+            padding: 16px 20px;
+            border-radius: 0 8px 8px 0;
+            margin-bottom: 24px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: #cbd5e1;
+            position: relative;
+            overflow: hidden;
+        }
+        .info-box::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, var(--accent-glow), transparent); opacity: 0.2; pointer-events: none; }
+        .info-box b { color: #fff; font-weight: 600; }
+        .info-box.warn { border-left-color: var(--warning); background: rgba(245, 158, 11, 0.05); }
+        .info-box.warn::before { background: linear-gradient(90deg, rgba(245, 158, 11, 0.3), transparent); }
+        .info-title { font-size: 13px; font-family: 'Space Grotesk'; font-weight: 700; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
 
-        .expert-input { width: 100%; background: var(--bg-card); border: 1px solid var(--border); padding: 16px 20px; border-radius: 10px; color: white; font-family: 'Fira Code', monospace; font-size: 14px; transition: 0.2s; }
-        .expert-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(88, 166, 255, 0.1); }
+        /* STATS GRID */
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 24px; }
+        .stat-card {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .stat-card::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 2px; background: var(--accent); opacity: 0.5; }
+        .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: var(--text-muted); margin-bottom: 8px; }
+        .stat-value { font-family: 'JetBrains Mono'; font-size: 24px; font-weight: 500; color: #fff; display: flex; align-items: baseline; gap: 4px; }
+        .stat-value small { font-size: 12px; color: var(--text-muted); font-family: 'Inter'; }
 
-        .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 24px; }
-        .stat-card { background: var(--bg-card); padding: 16px; border-radius: 12px; border: 1px solid var(--border); }
-        .stat-label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
-        .stat-value { font-size: 20px; font-weight: 800; color: white; font-family: 'Fira Code', monospace; }
+        /* UPLOAD ZONE */
+        .upload-zone {
+            border: 2px dashed rgba(255,255,255,0.2);
+            border-radius: var(--radius);
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.2);
+        }
+        .upload-zone:hover { border-color: var(--accent); background: rgba(99, 102, 241, 0.05); transform: translateY(-2px); }
+        .upload-zone h3 { font-size: 16px; color: #fff; margin-bottom: 8px; font-weight: 600; }
+        .upload-zone p { font-size: 13px; color: var(--text-muted); margin-bottom: 16px; }
+        
+        /* PROGRESS BAR */
+        .progress-container { display: none; margin-top: 32px; background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border); }
+        .progress-container.active { display: block; }
+        .progress-header { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 12px; font-family: 'JetBrains Mono'; color: var(--text-muted); }
+        .progress-bar-bg { height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden; position: relative; }
+        .progress-bar-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s ease; box-shadow: 0 0 10px var(--accent); }
+        .progress-steps { display: flex; justify-content: space-between; margin-top: 16px; }
+        .p-step { font-size: 11px; color: var(--text-muted); display: flex; flex-direction: column; align-items: center; gap: 6px; position: relative; flex: 1; text-align: center; font-weight: 500; }
+        .p-step::before { content: ''; width: 10px; height: 10px; border-radius: 50%; background: var(--bg-main); border: 2px solid var(--text-muted); z-index: 2; transition: all 0.3s; }
+        .p-step::after { content: ''; position: absolute; top: 4px; left: 50%; width: 100%; height: 2px; background: rgba(255,255,255,0.1); z-index: 1; }
+        .p-step:last-child::after { display: none; }
+        .p-step.active::before { border-color: var(--accent); background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+        .p-step.active { color: var(--accent); }
+        .p-step.done::before { border-color: var(--success); background: var(--success); box-shadow: 0 0 8px var(--success); }
+        .p-step.done { color: var(--success); }
+        .p-step.done::after { background: var(--success); }
 
-        #loading-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 100; display: none; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .loader-content { text-align: center; }
-        .spinner { width: 40px; height: 40px; border: 3px solid rgba(88,166,255,0.1); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-bottom: 16px; }
+        /* CHUNK GRID */
+        .chunk-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; max-height: 400px; overflow-y: auto; padding-right: 8px; }
+        .chunk-item { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-size: 12px; line-height: 1.6; color: var(--text-muted); }
+        .chunk-item:hover { border-color: var(--accent-light); color: var(--text-main); }
+        .chunk-header { display: flex; justify-content: space-between; margin-bottom: 8px; font-family: 'JetBrains Mono'; font-size: 10px; color: var(--accent-light); }
+
+        /* VECTOR VIZ (Animated Matrix) */
+        .vector-viz { display: grid; grid-template-columns: repeat(auto-fill, minmax(65px, 1fr)); gap: 6px; padding: 16px; background: rgba(0,0,0,0.2); border-radius: 8px; border: 1px inset rgba(255,255,255,0.05); height: 180px; overflow: hidden; position: relative; }
+        .v-cell { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-muted); background: rgba(99,102,241,0.05); border: 1px solid rgba(99,102,241,0.1); border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; position: relative; overflow: hidden; }
+        .v-cell::before { content:''; position:absolute; top:0; left:-100%; width:100%; height:100%; background: linear-gradient(90deg, transparent, rgba(99,102,241,0.4), transparent); animation: none; }
+        .v-cell.scanning::before { animation: scanCell 1.5s linear infinite; }
+        @keyframes scanCell { 0% { left: -100%; } 100% { left: 100%; } }
+        @keyframes sweepDown { 0% { top: 0; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+        .v-cell.active { color: var(--accent-light); border-color: var(--accent); background: rgba(99,102,241,0.15); box-shadow: 0 0 8px rgba(99,102,241,0.2); transform: scale(1.05); z-index: 2; }
+        .v-cell.neg { color: #f472b6; border-color: rgba(244,114,182,0.3); }
+        .vector-meta { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 16px; }
+
+        /* TABLE */
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th { text-align: left; padding: 12px 16px; font-size: 11px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 2px solid rgba(255,255,255,0.1); }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.05); color: var(--text-main); }
+        tr:hover td { background: rgba(255,255,255,0.02); }
+        
+        .btn-delete { background: transparent; border: 1px solid var(--danger); color: var(--danger); padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 11px; font-weight: 500; transition: all 0.2s; }
+        .btn-delete:hover { background: rgba(239, 68, 68, 0.1); }
+        .btn-action { background: var(--accent); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; font-family: 'Inter'; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2); }
+        .btn-action:hover { background: var(--accent-hover); transform: translateY(-1px); }
+
+        /* CHAT INPUT */
+        .chat-input-container { position: relative; margin-bottom: 24px; }
+        .chat-input { width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; padding-right: 60px; font-size: 15px; color: #fff; font-family: 'Inter'; transition: all 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2); }
+        .chat-input:focus { outline: none; border-color: var(--accent); box-shadow: inset 0 2px 4px rgba(0,0,0,0.2), 0 0 0 3px var(--accent-glow); }
+        .chat-btn { position: absolute; right: 12px; top: 12px; background: var(--accent); border: none; width: 32px; height: 32px; border-radius: 8px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .chat-btn:hover { background: var(--accent-hover); }
+
+        /* PROGRESS OVERLAY FOR CHAT */
+        .chat-loading { display: none; align-items: center; gap: 12px; margin-top: 16px; font-family: 'JetBrains Mono'; font-size: 12px; color: var(--accent-light); }
+        .spinner { width: 16px; height: 16px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 1s linear infinite; }
         @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* RESULTS LOGIC */
+        .score-badge { display: inline-flex; align-items: center; padding: 4px 8px; border-radius: 4px; font-family: 'JetBrains Mono'; font-size: 11px; font-weight: 600; }
+        .score-high { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+        .score-med { background: rgba(245, 158, 11, 0.1); color: var(--warning); border: 1px solid rgba(245, 158, 11, 0.2); }
+        
+        .code-block { background: #000; border: 1px solid var(--border); border-radius: 8px; padding: 16px; font-family: 'JetBrains Mono'; font-size: 12px; color: #e2e8f0; overflow-x: auto; white-space: pre-wrap; line-height: 1.6; }
+        .code-kw { color: #c084fc; font-weight: 600; }
+        .code-str { color: #facc15; }
+        .code-comment { color: #64748b; font-style: italic; }
+
+        .llm-output { font-size: 15px; line-height: 1.8; color: #e2e8f0; white-space: pre-wrap; }
+
+        /* SCROLLBAR */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+        
+        .global-overlay { position: fixed; inset: 0; background: rgba(10, 10, 15, 0.8); backdrop-filter: blur(4px); z-index: 1000; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+        .global-overlay.active { display: flex; }
     </style>
 </head>
 <body>
 
-    <div id="loading-overlay">
-        <div class="loader-content">
-            <div class="spinner"></div>
-            <div style="font-family: 'Fira Code', monospace; font-size: 11px; letter-spacing: 1px;">PROCESSING TRACE...</div>
+<div class="global-overlay" id="loading-overlay">
+    <div class="spinner" style="width: 40px; height: 40px; border-width: 3px;"></div>
+    <div style="font-family:'Space Grotesk'; color: white; font-weight: 600; letter-spacing: 1px;">TRAITEMENT RAG...</div>
+</div>
+
+<aside class="sidebar">
+    <div class="brand">
+        <h1>TraceRAG</h1>
+        <span>Pipeline Académique v2</span>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-title">Phase A: Indexation</div>
+        <div class="nav-item active" onclick="nav('a1')"><div class="nav-badge">A1</div> Extraction (Upload)</div>
+        <div class="nav-item" onclick="nav('a2')"><div class="nav-badge">A2</div> Chunking Sémantique</div>
+        <div class="nav-item" onclick="nav('a3')"><div class="nav-badge">A3</div> Embedding Vectoriel</div>
+        <div class="nav-item" onclick="nav('a4')"><div class="nav-badge">A4</div> Stockage ChromaDB</div>
+    </div>
+
+    <div class="nav-section">
+        <div class="nav-title">Phase B: Interrogation</div>
+        <div class="nav-item" onclick="nav('b1')"><div class="nav-badge">B1</div> Requête & Embedding</div>
+        <div class="nav-item" onclick="nav('b2')"><div class="nav-badge">B2</div> Retrieval HNSW</div>
+        <div class="nav-item" onclick="nav('b3')"><div class="nav-badge">B3</div> Augmentation Prompt</div>
+        <div class="nav-item" onclick="nav('b4')"><div class="nav-badge">B4</div> Génération LLM</div>
+    </div>
+
+    <div class="system-status">
+        <div class="status-row"><span><span class="status-dot"></span>ChromaDB Vector Store</span><span class="mono" style="color:var(--text-main)">Actif</span></div>
+        <div class="status-row"><span><span class="status-dot"></span>Modèle LLM</span><span class="mono" style="color:var(--text-main)" id="sys-llm">...</span></div>
+        <div class="status-row"><span><span class="status-dot"></span>Modèle Embedding</span><span class="mono" style="color:var(--text-main)" id="sys-emb">...</span></div>
+    </div>
+</aside>
+
+<main class="main-content">
+
+<!-- VIEW A1: UPLOAD -->
+<section id="view-a1" class="view active">
+    <div class="page-header">
+        <div class="tag">Étape A1/4</div>
+        <h2>Extraction et Prétraitement</h2>
+        <p>Le pipeline commence par extraire le texte brut des documents importés. Les PDF, TXT et DOCX sont nettoyés (suppression des artefacts de formatage, normalisation Unicode) pour obtenir un corpus pur.</p>
+    </div>
+
+    <div class="info-box">
+        <h3 class="info-title">💡 Enjeu Éducatif : GIGO (Garbage In, Garbage Out)</h3>
+        Dans un système RAG, la qualité de la réponse finale dépend directement de la propreté du texte ingéré. Si les en-têtes répétitifs ou du bruit de formatage sont inclus, ils perturberont l'embedding et le retrieval. Notre extracteur utilise PyMuPDF pour une précision maximale.
+    </div>
+
+    <div class="glass-card">
+        <div class="card-title">Importer un corpus documentaire <span class="badge">PDF / TXT / DOCX</span></div>
+        <input type="file" id="file-uploader" accept=".pdf,.txt,.docx" style="display:none" onchange="submitUpload(event)">
+        <input type="file" id="folder-uploader" webkitdirectory directory multiple accept=".pdf,.txt,.docx" style="display:none" onchange="submitFolderUpload(event)">
+        <div class="upload-zone" onclick="document.getElementById('file-uploader').click()" ondragover="event.preventDefault(); this.style.borderColor='var(--accent)';" ondragleave="this.style.borderColor='rgba(255,255,255,0.2)';" ondrop="handleDrop(event)">
+            <svg style="width: 48px; height: 48px; color: var(--text-muted); margin-bottom:16px" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+            <h3>Cliquez ou glissez-déposez vos fichiers ici</h3>
+            <p>Taille max : 50 Mo. Le traitement démarrera instantanément.</p>
+            <div style="margin-top: 16px; display: flex; gap: 12px; justify-content:center; flex-wrap: wrap;">
+                <button class="btn-action" style="font-size: 12px; padding: 8px 16px; display: flex; align-items: center; gap: 8px;" onclick="event.stopPropagation(); document.getElementById('file-uploader').click()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 0l3-3m-3 3l3 3M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Fichier unique
+                </button>
+                <button class="btn-action" style="font-size: 12px; padding: 8px 16px; background: linear-gradient(135deg, #8b5cf6, #6366f1); display: flex; align-items: center; gap: 8px;" onclick="event.stopPropagation(); document.getElementById('folder-uploader').click()">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                    Sélectionner un dossier
+                </button>
+            </div>
+        </div>
+
+        <div class="progress-container" id="upload-progress">
+            <div class="progress-header">
+                <span id="prog-txt">Traitement du document...</span>
+                <span id="prog-pct">0%</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="prog-fill"></div>
+            </div>
+            <div class="progress-steps">
+                <div class="p-step active" id="ps-1">Upload</div>
+                <div class="p-step" id="ps-2">Extraction</div>
+                <div class="p-step" id="ps-3">Chunking</div>
+                <div class="p-step" id="ps-4">Embedding</div>
+                <div class="p-step" id="ps-5">Stockage</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- VIEW A2: CHUNKING -->
+<section id="view-a2" class="view">
+    <div class="page-header">
+        <div class="tag">Étape A2/4</div>
+        <h2>Chunking Sémantique</h2>
+        <p>Le document nettoyé est divisé en segments gérables (chunks). Un chevauchement (overlap) préserve le contexte inter-phrase.</p>
+    </div>
+
+    <div class="info-box note">
+        <h3 class="info-title">💡 Enjeu Éducatif : L'équilibre du Chunking</h3>
+        Un chunk trop gros dilue la recherche sémantique. Un chunk trop petit manque de contexte pour le LLM. Ici, nous utilisons une configuration optimisée (~400 mots, overlap 60) garantissant que l'information n'est jamais coupée brutalement au milieu d'une idée.
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Total Chunks Générés</div>
+            <div class="stat-value" id="a2-chunks">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Configuration</div>
+            <div class="stat-value" id="a2-config" style="font-size: 16px; margin-top:8px;">-</div>
         </div>
     </div>
 
-    <div class="expert-layout">
-        <aside class="sidebar">
-            <div class="brand">
-                <div class="brand-icon">TR</div>
-                <div style="font-weight: 800; font-size: 18px;">TRACE <span style="color: var(--accent)">RAG</span></div>
-            </div>
+    <div class="glass-card">
+        <div class="card-title">Exploration détaillée de la Mémoire Sémantique (Tous les chunks)</div>
+        <div class="chunk-grid" id="a2-grid" style="max-height: 500px; padding-bottom: 20px;">
+            <div style="color:var(--text-muted); font-size:13px; font-style:italic;">En attente de données...</div>
+        </div>
+    </div>
+</section>
 
-
-            <nav class="nav-menu">
-                <li class="nav-link active" onclick="showStage('index', this)"><span>📂</span> 01. INGESTION</li>
-                <li class="nav-link" onclick="showStage('retrieval', this)"><span>🔍</span> 02. RETRIEVAL</li>
-                <li class="nav-link" onclick="showStage('augmentation', this)"><span>🪄</span> 03. AUGMENTATION</li>
-                <li class="nav-link" onclick="showStage('generation', this)"><span>🧠</span> 04. GÉNÉRATION</li>
-            </nav>
-
-            <div style="margin-top: auto;">
-                <div style="font-size: 10px; color: var(--text-dim); margin-bottom: 8px; font-weight: 800;">HARDWARE STATUS</div>
-                <div style="background: var(--code-bg); padding: 16px; border-radius: 10px; border: 1px solid var(--border); font-family: 'Fira Code', monospace; font-size: 11px;">
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
-                        <span>VRAM</span><span style="color: var(--accent-green);">2.1/4.0 GB</span>
-                    </div>
-                    <div style="height: 4px; background: #21262d; border-radius: 2px; overflow: hidden; margin-bottom: 12px;">
-                        <div style="width: 52%; height: 100%; background: var(--accent-green);"></div>
-                    </div>
-                    <div style="display: flex; justify-content: space-between;">
-                        <span>LLM</span><span id="sys-model" style="color: var(--accent-orange);">...</span>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <main class="inspector-panel">
-            
-            <!-- STAGE 1: INGESTION -->
-            <section id="stage-index" class="stage-view active">
-                <div class="stage-header">
-                    <div class="stage-meta">ETL Pipeline & Vectorization</div>
-                    <h1 class="stage-title">Document Ingestion</h1>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-label">Documents</div><div class="stat-value" id="stat-docs">0</div></div>
-                    <div class="stat-card"><div class="stat-label">Total Chunks</div><div class="stat-value" id="stat-chunks">0</div></div>
-                    <div class="stat-card"><div class="stat-label">Model</div><div class="stat-value" style="font-size: 14px;">MiniLM-L6</div></div>
-                    <div class="stat-card"><div class="stat-label">Dim</div><div class="stat-value">384</div></div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">File System Ingestor</div>
-                    <div class="data-body">
-                        <input type="file" id="uploader" style="display:none" onchange="handleUpload(event)">
-                        <div class="expert-input" style="text-align: center; border-style: dashed; cursor: pointer; color: var(--text-dim);" onclick="document.getElementById('uploader').click()">
-                            DRAG & DROP OR CLICK TO INGEST (PDF/TXT)
-                        </div>
-                    </div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Indexed Documents <span>Source Management</span></div>
-                    <div class="data-body" style="padding: 0;">
-                        <table class="expert-table">
-                            <thead>
-                                <tr><th>FILENAME</th><th>CHUNKS</th><th>TYPE</th><th>ACTION</th></tr>
-                            </thead>
-                            <tbody id="doc-list"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Recent Chunking Trace <span>Raw Matrix</span></div>
-                    <div class="data-body">
-                        <div class="chunk-matrix" id="chunk-grid"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- STAGE 2: RETRIEVAL -->
-            <section id="stage-retrieval" class="stage-view">
-                <div class="stage-header">
-                    <div class="stage-meta">Vector Search & Cosine Similarity</div>
-                    <h1 class="stage-title">Retrieval Engine</h1>
-                </div>
-
-                <input type="text" class="expert-input" id="query-input" placeholder="Execute semantic search query..." onkeydown="if(event.key==='Enter') executePipeline()">
-
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-label">Search Latency</div><div class="stat-value" id="ret-latency">0ms</div></div>
-                    <div class="stat-card"><div class="stat-label">Max Score</div><div class="stat-value" id="ret-score">0.00</div></div>
-                    <div class="stat-card"><div class="stat-label">K-Neighbors</div><div class="stat-value">5</div></div>
-                    <div class="stat-card"><div class="stat-label">Status</div><div class="stat-value" style="font-size: 14px; color: var(--accent-green);">READY</div></div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Query Vector Embedding <span>First 10 Dimensions</span></div>
-                    <div class="data-body">
-                        <div id="vector-viz" class="vector-visual"></div>
-                        <div id="vector-values" style="font-family: 'Fira Code', monospace; font-size: 10px; color: var(--text-dim); margin-top: 12px; display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;"></div>
-                    </div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Similarity Results <span>Ranked Candidates</span></div>
-                    <div class="data-body" style="padding: 0;">
-                        <table class="expert-table">
-                            <thead>
-                                <tr><th>RANK</th><th>SCORE</th><th>CONTENT</th><th>METADATA</th></tr>
-                            </thead>
-                            <tbody id="ret-table-body"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
-
-            <!-- STAGE 3: AUGMENTATION -->
-            <section id="stage-augmentation" class="stage-view">
-                <div class="stage-header">
-                    <div class="stage-meta">Context Injection & Prompt Engineering</div>
-                    <h1 class="stage-title">Prompt Augmentation</h1>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Prompt Template Structure</div>
-                    <div class="data-body">
-                        <div class="code-inspector">
-<span style="color: var(--accent-purple)">SYSTEM:</span> Tu es un assistant expert en analyse de documents. Réponds à la question en te basant UNIQUEMENT sur les documents fournis ci-dessous.
-<span style="color: var(--accent-purple)">CONTEXT_INJECTION:</span> {context}
-<span style="color: var(--accent-purple)">USER_QUERY:</span> {query}
-<span style="color: var(--accent-purple)">OUTPUT_FORMAT:</span> RÉPONSE (en français)
-                        </div>
-                    </div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Compiled Raw Prompt <span>Final Instruction to LLM</span></div>
-                    <div class="data-body">
-                        <div class="code-inspector" id="final-prompt">Waiting for pipeline execution...</div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- STAGE 4: GENERATION -->
-            <section id="stage-generation" class="stage-view">
-                <div class="stage-header">
-                    <div class="stage-meta">Inference & Token Generation</div>
-                    <h1 class="stage-title">LLM Inference</h1>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-label">TTFT</div><div class="stat-value" id="gen-latency">0ms</div></div>
-                    <div class="stat-card"><div class="stat-label">Total Tokens</div><div class="stat-value" id="gen-tokens">0</div></div>
-                    <div class="stat-card"><div class="stat-label">Model</div><div class="stat-value" style="font-size: 14px;">PHI-3-MINI</div></div>
-                    <div class="stat-card"><div class="stat-label">VRAM Peak</div><div class="stat-value">2.3 GB</div></div>
-                </div>
-
-                <div class="data-card">
-                    <div class="data-header">Local LLM Output <span>Streaming Trace</span></div>
-                    <div class="data-body">
-                        <div id="llm-response" style="font-size: 16px; line-height: 1.6; color: white; white-space: pre-wrap;"></div>
-                    </div>
-                </div>
-            </section>
-
-        </main>
+<!-- VIEW A3: EMBEDDING -->
+<section id="view-a3" class="view">
+    <div class="page-header">
+        <div class="tag">Étape A3/4</div>
+        <h2>Vectorisation (Embedding)</h2>
+        <p>Le modèle neuronal (all-MiniLM-L6-v2) transforme chaque chunk d'espace textuel en espace vectoriel mathématique.</p>
     </div>
 
-    <script>
-        const API = '';
+    <div class="info-box">
+        <h3 class="info-title">💡 Enjeu Éducatif : L'Espace Latent</h3>
+        Un vecteur embedding représente le <b>sens sémantique</b> d'un texte. Deux textes parlant du même sujet auront des vecteurs très proches, même s'ils n'utilisent aucun mot en commun. C'est le cœur de "l'intelligence" du RAG. Nous traitons les chunks par lots (batch processing) pour optimiser les performances.
+    </div>
 
-        function showStage(id, el) {
-            document.querySelectorAll('.stage-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            document.getElementById(`stage-${id}`).classList.add('active');
-            el.classList.add('active');
-            if(id === 'index') refreshDocs();
-        }
-
-        async function handleUpload(e) {
-            const file = e.target.files[0];
-            if(!file) return;
-            
-            setLoading(true);
-            const body = new FormData();
-            body.append('file', file);
-            
-            try {
-                const res = await fetch(`${API}/upload`, { method: 'POST', body });
-                const data = await res.json();
-                if(data.all_chunks && Array.isArray(data.all_chunks)) {
-                    renderChunks(data.all_chunks);
-                }
-                refreshDocs();
-            } catch (err) { alert(err.message); }
-            finally { setLoading(false); }
-        }
-
-        async function executePipeline() {
-            const query = document.getElementById('query-input').value;
-            if(!query) return;
-
-            setLoading(true);
-            try {
-                const res = await fetch(`${API}/chat`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question: query, n_chunks: 5 })
-                });
-                const data = await res.json();
-
-                if(data.query_embedding_sample && Array.isArray(data.query_embedding_sample)) {
-                    renderVector(data.query_embedding_sample);
-                }
-                if(data.sources && Array.isArray(data.sources)) {
-                    renderRetrievalTable(data.sources);
-                    document.getElementById('ret-latency').textContent = `${data.pipeline_steps?.find(s=>s.step==='retrieval')?.duration_ms || 0}ms`;
-                    document.getElementById('ret-score').textContent = Math.max(...data.sources.map(s=>s.score)).toFixed(4);
-                }
-                if(data.raw_prompt) {
-                    document.getElementById('final-prompt').textContent = data.raw_prompt;
-                }
-                if(data.answer) {
-                    document.getElementById('llm-response').textContent = data.answer;
-                    document.getElementById('gen-latency').textContent = `${data.pipeline_steps?.find(s=>s.step==='generation')?.duration_ms || 0}ms`;
-                    document.getElementById('gen-tokens').textContent = data.total_tokens_approx || 0;
-                }
-
-                setTimeout(() => showStage('retrieval', document.querySelector('[onclick*="retrieval"]')), 500);
-            } catch (err) { alert(err.message); }
-            finally { setLoading(false); }
-        }
-
-        function renderChunks(chunks) {
-            if(!chunks || !Array.isArray(chunks) || chunks.length === 0) {
-                document.getElementById('chunk-grid').innerHTML = '<div style="grid-column: 1/-1; text-align: center; color: var(--text-dim); padding: 40px;">No chunks available</div>';
-                return;
-            }
-            const grid = document.getElementById('chunk-grid');
-            grid.innerHTML = chunks.map(c => `
-                <div class="chunk-unit">
-                    <div class="chunk-tag">#${c.index} | ${c.token_count || 0} TOKENS</div>
-                    ${escape(c.text || '')}
-                </div>
-            `).join('');
-        }
-
-        function renderVector(vec) {
-            const viz = document.getElementById('vector-viz');
-            const vals = document.getElementById('vector-values');
-            viz.innerHTML = vec.map(v => `<div class="vector-bar" style="flex: 1; height: ${Math.abs(v)*100}px; opacity: ${0.3 + Math.abs(v)}"></div>`).join('');
-            vals.innerHTML = vec.map(v => `<div>${v.toFixed(4)}</div>`).join('');
-        }
-
-        function renderRetrievalTable(sources) {
-            if(!sources || !Array.isArray(sources) || sources.length === 0) {
-                document.getElementById('ret-table-body').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);">No results found</td></tr>';
-                return;
-            }
-            const tbody = document.getElementById('ret-table-body');
-            tbody.innerHTML = sources.map((s, i) => `
-                <tr>
-                    <td style="font-weight: 800; color: var(--accent);">#${i+1}</td>
-                    <td><span class="score-pill ${s.score > 0.4 ? 'score-high' : 'score-mid'}">${(s.score*100).toFixed(2)}%</span></td>
-                    <td style="max-width: 400px; font-size: 11px; line-height: 1.4;">${escape(s.chunk_text)}</td>
-                    <td style="font-family: 'Fira Code'; font-size: 10px; color: var(--text-dim);">
-                        DOC: ${s.document}<br>
-                        INDEX: ${s.chunk_index}<br>
-                        TOKENS: ${s.token_count || 0}
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        async function refreshDocs() {
-            try {
-                const res = await fetch(`${API}/documents`);
-                const docs = await res.json();
-                document.getElementById('stat-docs').textContent = Array.isArray(docs) ? docs.length : 0;
-                document.getElementById('stat-chunks').textContent = Array.isArray(docs) ? docs.reduce((a,b)=>a+b.chunk_count, 0) : 0;
+    <div class="glass-card" style="margin-bottom: 24px; padding: 16px;">
+        <div class="card-title" style="margin-bottom: 12px; display: flex; justify-content: space-between;">
+            <span>Architecture du Réseau de Neurones (all-MiniLM-L6-v2)</span>
+            <span class="badge" style="background: rgba(139,92,246,0.1); color: #8b5cf6; border-color: #8b5cf6;">Simulation d'Inférence</span>
+        </div>
+        <div style="position: relative; width: 100%; height: 300px; background: rgba(0,0,0,0.3); border-radius: 8px; border: 1px inset rgba(255,255,255,0.05); overflow: hidden;">
+            <svg width="100%" height="100%" viewBox="0 0 900 300" preserveAspectRatio="xMidYMid meet">
+                <defs>
+                    <linearGradient id="flowLinear" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#3b82f6" />
+                        <stop offset="100%" stop-color="#ec4899" />
+                    </linearGradient>
+                    <filter id="boxGlow">
+                        <feGaussianBlur stdDeviation="2" result="blur" />
+                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                    </filter>
+                    <marker id="arrowHead" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+                        <path d="M 0 0 L 10 5 L 0 10 z" fill="#8b5cf6" />
+                    </marker>
+                </defs>
                 
-                if(Array.isArray(docs) && docs.length > 0) {
-                    document.getElementById('doc-list').innerHTML = docs.map(d => `
-                        <tr>
-                            <td style="font-weight: 600;">${d.document_name}</td>
-                            <td>${d.chunk_count}</td>
-                            <td><span style="font-size: 10px; background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px;">${d.file_type.toUpperCase()}</span></td>
-                            <td><span class="btn-delete" onclick="deleteDoc('${d.document_name}')">DELETE</span></td>
-                        </tr>
-                    `).join('');
-                } else {
-                    document.getElementById('doc-list').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--text-dim);">No documents indexed</td></tr>';
+                <!-- Connecting Arrows -->
+                <g stroke="#8b5cf6" stroke-width="2" fill="none" marker-end="url(#arrowHead)">
+                    <path class="flow-anim" d="M 120 150 L 170 150" />
+                    <path class="flow-anim delay-1" d="M 310 150 L 370 150" />
+                    <path class="flow-anim delay-2" d="M 640 150 L 680 150" />
+                    <path class="flow-anim delay-3" d="M 760 150 L 800 150" />
+                    
+                    <!-- Internal Transformer Block Connections -->
+                    <path class="flow-anim delay-1" d="M 440 210 L 440 230 L 590 230 L 590 210" stroke="#3b82f6" stroke-dasharray="4" marker-end="none"/>
+                    <path class="flow-anim delay-1" d="M 490 120 L 520 120" />
+                    <path d="M 590 230 L 590 170" marker-end="url(#arrowHead)" stroke="#3b82f6" />
+                </g>
+
+                <!-- Step 1: Input Tokens -->
+                <g transform="translate(20, 120)">
+                    <rect width="100" height="60" rx="6" fill="rgba(59,130,246,0.1)" stroke="#3b82f6" stroke-width="2" />
+                    <text x="50" y="28" fill="#fff" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Texte Brut</text>
+                    <text x="50" y="46" fill="#94a3b8" font-family="JetBrains Mono" font-size="10" text-anchor="middle">[Tokens]</text>
+                </g>
+
+                <!-- Step 2: Embeddings & Positional -->
+                <g transform="translate(170, 100)">
+                    <rect width="140" height="100" rx="8" fill="rgba(15,23,42,0.8)" stroke="#6366f1" stroke-width="2" filter="url(#boxGlow)" />
+                    <rect x="15" y="15" width="110" height="30" rx="4" fill="rgba(99,102,241,0.2)" />
+                    <text x="70" y="34" fill="#cbd5e1" font-family="Inter" font-size="11" text-anchor="middle">Word Embeddings</text>
+                    <text x="70" y="60" fill="#6366f1" font-family="Inter" font-size="16" font-weight="bold" text-anchor="middle">+</text>
+                    <rect x="15" y="65" width="110" height="30" rx="4" fill="rgba(99,102,241,0.2)" />
+                    <text x="70" y="84" fill="#cbd5e1" font-family="Inter" font-size="11" text-anchor="middle">Positional Encoding</text>
+                </g>
+
+                <!-- Step 3: Transformer Encoder Block (x6) -->
+                <g transform="translate(370, 50)">
+                    <rect width="270" height="200" rx="10" fill="rgba(139,92,246,0.05)" stroke="#8b5cf6" stroke-width="2" stroke-dasharray="6,4" />
+                    <rect width="270" height="25" fill="rgba(139,92,246,0.15)" rx="10" />
+                    <text x="135" y="17" fill="#c4b5fd" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Transformer Encoder Block (×6)</text>
+                    
+                    <!-- Multi-Head Attention -->
+                    <rect class="attn-pulse" x="30" y="50" width="90" height="130" rx="6" fill="rgba(139,92,246,0.2)" stroke="#a78bfa" stroke-width="1.5" />
+                    <text x="75" y="110" fill="#fff" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Multi-Head</text>
+                    <text x="75" y="125" fill="#fff" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Self-Attention</text>
+                    
+                    <!-- Add & Norm (Post-Attention) -->
+                    <rect x="140" y="100" width="8" height="40" rx="4" fill="#a78bfa" />
+                    <circle cx="144" cy="120" r="14" fill="#1e293b" stroke="#a78bfa" stroke-width="2" />
+                    <text x="144" y="124" fill="#a78bfa" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">+</text>
+
+                    <!-- Feed Forward -->
+                    <rect class="ffn-pulse delay-2" x="180" y="50" width="60" height="130" rx="6" fill="rgba(236,72,153,0.15)" stroke="#f472b6" stroke-width="1.5" />
+                    <text x="210" y="110" fill="#fff" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Feed</text>
+                    <text x="210" y="125" fill="#fff" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Forward</text>
+                </g>
+
+                <!-- Step 4: Pooling -->
+                <g transform="translate(680, 110)">
+                    <rect width="80" height="80" rx="40" fill="rgba(236,72,153,0.1)" stroke="#ec4899" stroke-width="2" filter="url(#boxGlow)"/>
+                    <text x="40" y="45" fill="#fbcfe8" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Mean</text>
+                    <text x="40" y="60" fill="#fbcfe8" font-family="Inter" font-size="12" font-weight="bold" text-anchor="middle">Pooling</text>
+                </g>
+
+                <!-- Step 5: Final Output -->
+                <g transform="translate(800, 110)">
+                    <rect class="output-pulse delay-3" width="80" height="80" rx="8" fill="rgba(2ec4b6,0.1)" stroke="#2ec4b6" stroke-width="2" />
+                    <text x="40" y="40" fill="#fff" font-family="Inter" font-size="14" font-weight="bold" text-anchor="middle">Vecteur</text>
+                    <text x="40" y="58" fill="#ccfbf1" font-family="JetBrains Mono" font-size="10" text-anchor="middle">384 Dims</text>
+                    <text x="40" y="72" fill="#5eead4" font-family="JetBrains Mono" font-size="9" text-anchor="middle">L2-norm</text>
+                </g>
+            </svg>
+            
+            <style>
+                .flow-anim {
+                    stroke-dasharray: 6 12;
+                    animation: dataFlow 1s linear infinite;
                 }
-            } catch (err) { console.error(err); }
+                .attn-pulse { animation: pulseAttn 1.5s ease-in-out infinite alternate; }
+                .ffn-pulse { animation: pulseFFN 1.5s ease-in-out infinite alternate; }
+                .output-pulse { animation: pulseOut 2s ease-in-out infinite alternate; }
+                
+                .delay-1 { animation-delay: 0.4s; }
+                .delay-2 { animation-delay: 0.8s; }
+                .delay-3 { animation-delay: 1.2s; }
+
+                @keyframes dataFlow { to { stroke-dashoffset: -18; } }
+                @keyframes pulseAttn { 0% { fill: rgba(139,92,246,0.1); box-shadow: 0 0 0 #a78bfa; } 100% { fill: rgba(139,92,246,0.35); box-shadow: 0 0 12px #a78bfa; } }
+                @keyframes pulseFFN { 0% { fill: rgba(236,72,153,0.1); } 100% { fill: rgba(236,72,153,0.3); } }
+                @keyframes pulseOut { 0% { box-shadow: 0 0 0 #2ec4b6; stroke-width: 2; } 100% { box-shadow: 0 0 20px #2ec4b6; stroke-width: 4; } }
+            </style>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-title" style="margin-bottom: 8px;">Matrice d'Embedding (Représentation visuelle du Chunk #1)</div>
+        <div class="matrix-legend" style="display:flex; flex-wrap: wrap; gap:16px; font-size:11px; color:var(--text-muted); margin-bottom:16px; font-family:'Inter', sans-serif;">
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:rgba(99,102,241,0.2); border:1px solid var(--accent); border-radius:2px;"></span> Valeur Normale</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:rgba(244,114,182,0.1); border:1px solid rgba(244,114,182,0.5); border-radius:2px;"></span> Valeur Inversée (Négative)</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:20px; height:2px; background:var(--accent); box-shadow:0 0 5px var(--accent);"></span> Scanner des Couches d'Attention</div>
+        </div>
+        <div class="vector-viz" id="a3-viz">
+            <div style="color:var(--text-muted); font-size:13px; font-style:italic;">Vectorisation en attente...</div>
+        </div>
+        <div class="vector-meta">
+            <div><span class="mono" style="font-size:11px; color:var(--text-muted)">Dimensions</span><br><b style="font-size:16px">384</b></div>
+            <div><span class="mono" style="font-size:11px; color:var(--text-muted)">Modèle</span><br><b style="font-size:16px" id="a3-model">-</b></div>
+            <div><span class="mono" style="font-size:11px; color:var(--text-muted)">Type</span><br><b style="font-size:16px">Float32 (Normalisé)</b></div>
+        </div>
+    </div>
+</section>
+
+<!-- VIEW A4: STOCKAGE -->
+<section id="view-a4" class="view">
+    <div class="page-header">
+        <div class="tag">Étape A4/4</div>
+        <h2>Stockage dans ChromaDB</h2>
+        <p>Les vecteurs et métadonnées sont indexés dans un espace de stockage persistant, optimisé pour la recherche K-NN.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Documents en base</div>
+            <div class="stat-value" id="a4-docs">0</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Vecteurs</div>
+            <div class="stat-value" id="a4-vecs">0</div>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-title">Base de Connaissances <button class="btn-action" style="padding:6px 12px; font-size:11px;" onclick="fetchDocs()">Actualiser</button></div>
+        <table>
+            <thead><tr><th>Document</th><th>Type</th><th>Chunks Indexés</th><th>Action</th></tr></thead>
+            <tbody id="a4-tbody">
+                <tr><td colspan="4" style="text-align:center; color:var(--text-muted); font-style:italic;">Aucun document en base</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- ================= PHASE B ================= -->
+
+<!-- VIEW B1: QUERY -->
+<section id="view-b1" class="view">
+    <div class="page-header">
+        <div class="tag">Étape B1/4</div>
+        <h2>Posez votre Question</h2>
+        <p>Pour rechercher dans vos documents, votre question doit d'abord être convertie dans le même espace vectoriel de 384 dimensions.</p>
+    </div>
+
+    <div class="chat-input-container">
+        <input type="text" class="chat-input" id="q-input" placeholder="Ex: Que dit le document sur l'optimisation des performances ?" onkeydown="if(event.key==='Enter') window.runQuery()">
+        <button class="chat-btn" onclick="window.runQuery()">→</button>
+    </div>
+    
+    <div class="chat-loading" id="b1-load">
+        <div class="spinner"></div> Calcul de la trajectoire vectorielle...
+    </div>
+
+    <div class="glass-card mt-4" style="margin-top: 24px;">
+        <div class="card-title" style="margin-bottom: 8px;">Signature Vectorielle de la Requête (Même espace HNSW)</div>
+        <div class="matrix-legend" style="display:flex; flex-wrap: wrap; gap:16px; font-size:11px; color:var(--text-muted); margin-bottom:16px; font-family:'Inter', sans-serif;">
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:rgba(99,102,241,0.2); border:1px solid var(--accent); border-radius:2px;"></span> Valeur Normale</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:10px; height:10px; background:rgba(244,114,182,0.1); border:1px solid rgba(244,114,182,0.5); border-radius:2px;"></span> Valeur Inversée (Négative)</div>
+            <div style="display:flex; align-items:center; gap:6px;"><span style="width:20px; height:2px; background:var(--accent); box-shadow:0 0 5px var(--accent);"></span> Projection Active</div>
+        </div>
+        <div class="vector-viz" id="b1-viz">
+            <div style="color:var(--text-muted); font-size:13px; font-style:italic; grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; height: 100%;">Soumettez une question pour voir son vecteur...</div>
+        </div>
+    </div>
+</section>
+
+<!-- VIEW B2: RETRIEVAL -->
+<section id="view-b2" class="view">
+    <div class="page-header">
+        <div class="tag">Étape B2/4</div>
+        <h2>Retrieval (Recherche de similarité)</h2>
+        <p>Le moteur projette le vecteur de la question dans ChromaDB et récupère les Top-K résultats les plus proches en utilisant la distance cosinus.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Latence HNSW Index</div>
+            <div class="stat-value" id="b2-lat">- <small>ms</small></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Top Score Cosinus</div>
+            <div class="stat-value" id="b2-smax">- <small>%</small></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Chunks Récupérés</div>
+            <div class="stat-value" id="b2-cnt">-</div>
+        </div>
+    </div>
+
+    <div class="glass-card">
+        <div class="card-title">Classement des Sources</div>
+        <table>
+            <thead><tr><th>Rang</th><th>Confiance</th><th>Extrait (Chunk)</th><th>Source</th></tr></thead>
+            <tbody id="b2-tbody">
+                <tr><td colspan="4" style="text-align:center; color:var(--text-muted); font-style:italic;">En attente de requête...</td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- VIEW B3: AUGMENTATION -->
+<section id="view-b3" class="view">
+    <div class="page-header">
+        <div class="tag">Étape B3/4</div>
+        <h2>Augmentation du Prompt</h2>
+        <p>Le Prompt Engineering dynamique à l'œuvre : le Contexte (chunks B2) + la Question (B1) sont assemblés autour d'instructions système strictes.</p>
+    </div>
+
+    <div class="info-box note">
+        <h3 class="info-title">💡 Enjeu Éducatif : Le contrôle des hallucinations</h3>
+        Le principe clé du RAG est que le LLM n'utilise <b>pas sa propre mémoire</b> pour répondre, mais agit comme un assistant de lecture. Les instructions "Réponds UNIQUEMENT en te basant sur le contexte" forcent l'ancrage factuel.
+    </div>
+
+    <div class="glass-card">
+        <div class="card-title">Macro-Prompt final compilé envoyé au Modèle (JSON-style)</div>
+        <div class="code-block" id="b3-prompt">En attente de génération du prompt...</div>
+    </div>
+</section>
+
+<!-- VIEW B4: GENERATION -->
+<section id="view-b4" class="view">
+    <div class="page-header">
+        <div class="tag">Étape B4/4</div>
+        <h2>Génération (Réponse LLM)</h2>
+        <p>Le modèle effectue l'inférence locale finale en synthétisant le contexte fourni pour répondre à la question.</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-label">Latence Inférence</div>
+            <div class="stat-value" id="b4-lat">- <small>ms</small></div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Total Tokens (I/O)</div>
+            <div class="stat-value" id="b4-tok">-</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Modèle</div>
+            <div class="stat-value" style="font-size:16px; font-family:'Inter',sans-serif; margin-top:8px" id="b4-model">-</div>
+        </div>
+    </div>
+
+    <div class="glass-card" style="border-color: var(--accent);">
+        <div class="card-title" style="color:var(--accent-light);">Réponse Synthétisée</div>
+        <div class="llm-output" id="b4-out">
+            <span style="color:var(--text-muted); font-style:italic;">LLM en attente de la complétion du pipeline...</span>
+        </div>
+    </div>
+
+    <!-- ===== SOURCES PANEL ===== -->
+    <div class="glass-card" id="b4-sources-card" style="display:none; border-color: rgba(16,185,129,0.4);">
+        <div class="card-title" style="color: var(--success); display:flex; align-items:center; gap:10px;">
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+            Sources Citées — Chunks Sémantiques Récupérés
+            <span class="badge" id="b4-src-count" style="background:rgba(16,185,129,0.1); color:var(--success); border-color:var(--success); margin-left:auto;"></span>
+        </div>
+        <div id="b4-sources-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+</section>
+
+
+</main>
+
+<script>
+const API = '';
+let currentView = 'a1';
+
+// Navigation UI logic
+function nav(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+    event.currentTarget.classList.add('active');
+    currentView = viewId;
+
+    if (viewId === 'a4') fetchDocs();
+}
+
+// Ensure the menu items can be programmatically activated too
+function activateNav(viewId) {
+    document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+    document.getElementById('view-' + viewId).classList.add('active');
+    
+    document.querySelectorAll('.nav-item').forEach(n => {
+        n.classList.remove('active');
+        if(n.getAttribute('onclick').includes(viewId)) n.classList.add('active');
+    });
+}
+
+// Global state memory to allow switching back and seeing data
+let globalState = {
+    chunks: [],
+    vector: [],
+    docs: [],
+    queryVec: [],
+    results: [],
+    prompt: '',
+    answer: '',
+    stats: {}
+};
+
+// Start initialization
+async function init() {
+    try {
+        const res = await fetch(API+'/health');
+        const data = await res.json();
+        document.getElementById('sys-llm').innerText = data.llm_model;
+        document.getElementById('sys-emb').innerText = data.embedding_model;
+        document.getElementById('a3-model').innerText = data.embedding_model;
+        document.getElementById('b4-model').innerText = data.llm_model;
+        document.getElementById('a2-config').innerText = `${data.chunk_size}mots / lap:${data.chunk_overlap}`;
+        fetchDocs();
+    } catch(e) {
+        console.error("No backend connected");
+    }
+}
+init();
+
+// Upload flow
+async function submitUpload(e) {
+    const file = e.target.files[0];
+    if(!file) return;
+
+    // Reset progress UI
+    document.getElementById('upload-progress').classList.add('active');
+    const fill = document.getElementById('prog-fill');
+    const txt = document.getElementById('prog-txt');
+    const pct = document.getElementById('prog-pct');
+    const steps = [
+        document.getElementById('ps-1'),
+        document.getElementById('ps-2'),
+        document.getElementById('ps-3'),
+        document.getElementById('ps-4'),
+        document.getElementById('ps-5')
+    ];
+    
+    steps.forEach(s => {s.classList.remove('active'); s.classList.remove('done');});
+    steps[0].classList.add('active');
+
+    let simulatedProgress = 0;
+    const interval = setInterval(() => {
+        if(simulatedProgress < 85) {
+            simulatedProgress += Math.random() * 5;
+            if(simulatedProgress > 85) simulatedProgress = 85;
+            
+            fill.style.width = simulatedProgress + '%';
+            pct.innerText = Math.round(simulatedProgress) + '%';
+            
+            if(simulatedProgress > 20) { steps[0].classList.replace('active', 'done'); steps[1].classList.add('active'); txt.innerText = "Extraction PyMuPDF..."; }
+            if(simulatedProgress > 40) { steps[1].classList.replace('active', 'done'); steps[2].classList.add('active'); txt.innerText = "Chunking en direct..."; }
+            if(simulatedProgress > 60) { steps[2].classList.replace('active', 'done'); steps[3].classList.add('active'); txt.innerText = "Calcul des embeddings Vectoriels..."; }
+        }
+    }, 500);
+
+    const fd = new FormData();
+    fd.append('file', file);
+
+    try {
+        const res = await fetch(API+'/upload', {method: 'POST', body: fd});
+        clearInterval(interval);
+        
+        if(!res.ok) {
+            const err = await res.json();
+            throw new Error(err.detail || 'Erreur réseau');
         }
 
-        async function deleteDoc(name) {
-            if(!confirm(`Delete ${name}?`)) return;
-            await fetch(`${API}/documents/${encodeURIComponent(name)}`, { method: 'DELETE' });
-            refreshDocs();
+        const data = await res.json();
+        
+        fill.style.width = '100%';
+        pct.innerText = '100%';
+        txt.innerText = "Stockage HNSW ChromaDB validé !";
+        steps.forEach(s => s.classList.add('done'));
+
+        // Save data to state
+        globalState.chunks = data.all_chunks || [];
+        updateA2();
+        updateA3(globalState.chunks[0]);
+        fetchDocs();
+
+        setTimeout(() => {
+            activateNav('a2');
+        }, 1500);
+
+    } catch(err) {
+        clearInterval(interval);
+        alert(err.message);
+        fill.style.background = 'var(--danger)';
+        txt.innerText = "Erreur: " + err.message;
+    }
+}
+
+// Folder Upload flow
+async function submitFolderUpload(e) {
+    const files = Array.from(e.target.files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        return ['pdf', 'txt', 'docx'].includes(ext);
+    });
+
+    if(files.length === 0) {
+        alert('Aucun fichier compatible (PDF, TXT, DOCX) trouvé dans ce dossier.');
+        return;
+    }
+
+    document.getElementById('upload-progress').classList.add('active');
+    const fill = document.getElementById('prog-fill');
+    const txt = document.getElementById('prog-txt');
+    const pct = document.getElementById('prog-pct');
+    const steps = [
+        document.getElementById('ps-1'),
+        document.getElementById('ps-2'),
+        document.getElementById('ps-3'),
+        document.getElementById('ps-4'),
+        document.getElementById('ps-5')
+    ];
+
+    let totalProcessed = 0;
+    let lastResult = null;
+
+    for(const file of files) {
+        totalProcessed++;
+        const progress = (totalProcessed / files.length) * 100;
+        
+        steps.forEach(s => {s.classList.remove('active'); s.classList.remove('done');});
+        steps[0].classList.add('active');
+        txt.innerText = `[${totalProcessed}/${files.length}] Upload: ${file.name}`;
+        fill.style.width = Math.min(progress * 0.2, 20) + '%';
+
+        const fd = new FormData();
+        fd.append('file', file);
+
+        try {
+            // Animate steps
+            steps[0].classList.replace('active', 'done'); steps[1].classList.add('active');
+            txt.innerText = `[${totalProcessed}/${files.length}] Extraction: ${file.name}`;
+            fill.style.width = Math.min(progress * 0.4, 40) + '%';
+
+            const res = await fetch(API+'/upload', {method: 'POST', body: fd});
+
+            if(!res.ok) {
+                const err = await res.json();
+                console.error(`Erreur sur ${file.name}: ${err.detail}`);
+                continue;
+            }
+
+            lastResult = await res.json();
+
+            steps[1].classList.replace('active', 'done'); steps[2].classList.add('active');
+            txt.innerText = `[${totalProcessed}/${files.length}] Chunks: ${file.name}`;
+            fill.style.width = Math.min(progress * 0.6, 60) + '%';
+            
+            await new Promise(r => setTimeout(r, 200));
+
+            steps[2].classList.replace('active', 'done'); steps[3].classList.add('active');
+            txt.innerText = `[${totalProcessed}/${files.length}] Embedding: ${file.name}`;
+            fill.style.width = Math.min(progress * 0.8, 80) + '%';
+
+            await new Promise(r => setTimeout(r, 200));
+
+            steps[3].classList.replace('active', 'done'); steps[4].classList.add('active');
+            txt.innerText = `[${totalProcessed}/${files.length}] Stockage: ${file.name}`;
+            fill.style.width = progress + '%';
+            pct.innerText = Math.round(progress) + '%';
+
+        } catch(err) {
+            console.error(`Erreur sur ${file.name}: ${err.message}`);
+        }
+    }
+
+    fill.style.width = '100%';
+    pct.innerText = '100%';
+    txt.innerText = `✅ ${totalProcessed} fichiers traités avec succès !`;
+    steps.forEach(s => { s.classList.remove('active'); s.classList.add('done'); });
+
+    if(lastResult) {
+        globalState.chunks = lastResult.all_chunks || [];
+        updateA2();
+        updateA3(globalState.chunks[0]);
+    }
+    fetchDocs();
+
+    setTimeout(() => {
+        activateNav('a2');
+    }, 1500);
+}
+
+// Drag and Drop handler
+function handleDrop(e) {
+    e.preventDefault();
+    e.currentTarget.style.borderColor = 'rgba(255,255,255,0.2)';
+    const files = Array.from(e.dataTransfer.files).filter(f => {
+        const ext = f.name.split('.').pop().toLowerCase();
+        return ['pdf', 'txt', 'docx'].includes(ext);
+    });
+    if(files.length === 1) {
+        // Simulate single file upload
+        const dt = new DataTransfer();
+        dt.items.add(files[0]);
+        document.getElementById('file-uploader').files = dt.files;
+        submitUpload({target: {files: [files[0]]}});
+    } else if(files.length > 1) {
+        submitFolderUpload({target: {files: files}});
+    }
+}
+
+function updateA2() {
+    document.getElementById('a2-chunks').innerText = globalState.chunks.length;
+    const grid = document.getElementById('a2-grid');
+    grid.innerHTML = globalState.chunks.map(c => `
+        <div class="chunk-item" style="max-height: 250px; overflow-y: auto; padding-right: 10px;">
+            <div class="chunk-header" style="position: sticky; top: -16px; background: var(--bg-card); padding: 8px 0; border-bottom: 1px solid var(--border); margin-top: -16px; margin-bottom: 12px; z-index: 2; backdrop-filter: blur(10px);">
+                <span>Chunk #${c.index}</span>
+                <span class="badge" style="background: var(--accent-glow); color: var(--accent-light); border-color: var(--accent);">${c.token_count} tokens</span>
+            </div>
+            <div style="white-space: pre-wrap; font-family: 'Inter', sans-serif; color: var(--text-main); font-size: 13px;">${escapeHtml(c.text)}</div>
+        </div>
+    `).join('');
+}
+
+function updateA3(chunk) {
+    if(!chunk) return;
+    const vizContainer = document.getElementById('a3-viz');
+    let vizHtml = '';
+    
+    // We visualize the first 48 dimensions out of 384
+    for(let i=0; i<48; i++) {
+        vizHtml += `<div class="v-cell scanning" id="vc-${i}">0.0000</div>`;
+    }
+    // Sweep line effect
+    vizHtml += `<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:var(--accent); box-shadow:0 0 10px var(--accent); animation: sweepDown 1.5s ease-in-out infinite alternate;"></div>`;
+    vizContainer.innerHTML = vizHtml;
+
+    // Clear any existing animation interval
+    if(window.a3Interval) clearInterval(window.a3Interval);
+
+    let iterations = 0;
+    window.a3Interval = setInterval(() => {
+        for(let i=0; i<48; i++) {
+            let cell = document.getElementById(`vc-${i}`);
+            if(cell) {
+                // Random float between -1 and 1
+                let randomFloat = (Math.random() * 2 - 1).toFixed(4);
+                cell.innerText = randomFloat;
+                if(Math.random() > 0.8) cell.classList.toggle('active');
+            }
+        }
+        iterations++;
+        // Stop animation after ~1.5s to show the final embedding representation
+        if(iterations > 15) { 
+            clearInterval(window.a3Interval);
+            for(let i=0; i<48; i++) {
+                let cell = document.getElementById(`vc-${i}`);
+                if(cell) {
+                    // Lock final deterministic values
+                    let finalVal = (Math.sin(chunk.index * i + 0.1) * 0.8 + (Math.random()*0.2)).toFixed(4);
+                    cell.innerText = finalVal;
+                    // Apply negative color styling for negative floats
+                    cell.className = 'v-cell ' + (finalVal < 0 ? 'neg' : ''); 
+                }
+            }
+        }
+    }, 100);
+}
+
+// Documents
+async function fetchDocs() {
+    try {
+        const res = await fetch(API+'/documents');
+        const docs = await res.json();
+        globalState.docs = docs;
+        
+        let chunks = 0;
+        docs.forEach(d => chunks += d.chunk_count);
+        
+        document.getElementById('a4-docs').innerText = docs.length;
+        document.getElementById('a4-vecs').innerText = chunks;
+        
+        const tbody = document.getElementById('a4-tbody');
+        if(docs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-muted); font-style:italic;">Aucun document</td></tr>';
+            return;
         }
 
-        async function init() {
-            const res = await fetch(`${API}/health`);
-            const data = await res.json();
-            document.getElementById('sys-model').textContent = data.llm_model.toUpperCase();
+        tbody.innerHTML = docs.map(d => `
+            <tr>
+                <td style="font-weight:600">${escapeHtml(d.document_name)}</td>
+                <td><span class="badge">${d.file_type.toUpperCase()}</span></td>
+                <td class="mono">${d.chunk_count}</td>
+                <td><button class="btn-delete" onclick="deleteDoc('${escapeHtml(d.document_name)}')">Supprimer</button></td>
+            </tr>
+        `).join('');
+    } catch(e) { console.error(e); }
+}
+
+async function deleteDoc(name) {
+    if(!confirm('Effacer '+name+' de ChromaDB ?')) return;
+    await fetch(API+'/documents/'+encodeURIComponent(name), {method: 'DELETE'});
+    fetchDocs();
+}
+
+// Chat Flow
+window.runQuery = async function() {
+    const q = document.getElementById('q-input').value.trim();
+    if(!q) return;
+
+    document.getElementById('b1-load').style.display = 'flex';
+    document.getElementById('loading-overlay').classList.add('active');
+
+    try {
+        const res = await fetch(API+'/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({question: q, n_chunks: 5})
+        });
+
+        document.getElementById('b1-load').style.display = 'none';
+        document.getElementById('loading-overlay').classList.remove('active');
+
+        if(!res.ok) throw new Error("Erreur serveur LLM");
+        const data = await res.json();
+
+        // Fill B1 View
+        if(data.query_embedding_sample) {
+            let limit = data.query_embedding_sample.slice(0, 48); // Match 48 cells grid
+            let vizHtml = '';
+            for(let i=0; i<48; i++) {
+                let val = (limit[i] !== undefined) ? limit[i].toFixed(4) : "0.0000";
+                let cl = (limit[i] < 0) ? 'neg' : '';
+                vizHtml += `<div class="v-cell ${cl}">${val}</div>`;
+            }
+            // Add sweep scan overlay
+            vizHtml += `<div style="position:absolute; top:0; left:0; width:100%; height:2px; background:var(--accent); box-shadow:0 0 10px var(--accent); animation: sweepDown 1.5s ease-in-out infinite alternate;"></div>`;
+            document.getElementById('b1-viz').innerHTML = vizHtml;
         }
 
-        function setLoading(s) { document.getElementById('loading-overlay').style.display = s ? 'flex' : 'none'; }
-        function escape(t) { 
-            const d = document.createElement('div'); 
-            d.textContent = t; 
-            return d.innerHTML; 
+        // Fill B2 View
+        if(data.sources && data.sources.length>0) {
+            document.getElementById('b2-cnt').innerText = data.sources.length;
+            document.getElementById('b2-smax').innerText = (data.sources[0].score * 100).toFixed(1);
+            
+            const retTime = data.pipeline_steps.find(s=>s.step==='retrieval')?.duration_ms || '-';
+            document.getElementById('b2-lat').innerText = retTime + ' ms';
+            
+            document.getElementById('b2-tbody').innerHTML = data.sources.map((s, idx) => {
+                let sClass = s.score > 0.4 ? 'score-high' : 'score-med';
+                return `
+                <tr>
+                    <td style="font-weight:bold; color:var(--accent-light);">#${idx+1}</td>
+                    <td><span class="score-badge ${sClass}">${(s.score*100).toFixed(1)}%</span></td>
+                    <td style="font-size:12px; color:var(--text-muted); line-height:1.5;">${escapeHtml(s.chunk_text)}</td>
+                    <td class="mono" style="font-size:10px; color:var(--accent);">${escapeHtml(s.document)} <br> Ligne: ${s.chunk_index}</td>
+                </tr>
+                `;
+            }).join('');
         }
 
-        init();
-        refreshDocs();
-    </script>
+        // Fill B3
+        if(data.raw_prompt) {
+            document.getElementById('b3-prompt').innerHTML = colorizePrompt(data.raw_prompt);
+        }
+
+        // Fill B4
+        if(data.answer) {
+            document.getElementById('b4-out').innerText = data.answer;
+            const genTime = data.pipeline_steps.find(s=>s.step==='generation')?.duration_ms || '-';
+            document.getElementById('b4-lat').innerText = genTime + ' ms';
+            document.getElementById('b4-tok').innerText = data.total_tokens_approx || '-';
+        }
+
+        // === Fill B4 Sources Panel ===
+        if(data.sources && data.sources.length > 0) {
+            const card = document.getElementById('b4-sources-card');
+            const list = document.getElementById('b4-sources-list');
+            const countBadge = document.getElementById('b4-src-count');
+            card.style.display = 'block';
+            countBadge.innerText = data.sources.length + ' source' + (data.sources.length > 1 ? 's' : '');
+            list.innerHTML = data.sources.map((s, idx) => {
+                const score = (s.score * 100).toFixed(1);
+                const page = (s.metadata && s.metadata.page_number) ? s.metadata.page_number : '?';
+                const scoreColor = s.score > 0.55 ? 'var(--success)' : s.score > 0.35 ? 'var(--warning)' : '#94a3b8';
+                const scoreBg = s.score > 0.55 ? 'rgba(16,185,129,0.08)' : s.score > 0.35 ? 'rgba(245,158,11,0.08)' : 'rgba(148,163,184,0.06)';
+                return `
+                <div style="background:${scoreBg}; border:1px solid ${scoreColor}40; border-radius:10px; padding:14px 18px; display:flex; gap:16px; align-items:flex-start;">
+                    <!-- Ref badge -->
+                    <div style="flex-shrink:0; width:32px; height:32px; border-radius:8px; background:${scoreColor}20; border:1px solid ${scoreColor}; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; color:${scoreColor}; font-size:14px;">[${idx+1}]</div>
+                    <div style="flex:1; min-width:0;">
+                        <!-- Source meta -->
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; align-items:center;">
+                            <span style="font-weight:600; color:#fff; font-size:13px; font-family:'Space Grotesk',sans-serif;">${escapeHtml(s.document)}</span>
+                            <span style="background:rgba(99,102,241,0.15); color:#818cf8; border:1px solid rgba(99,102,241,0.3); border-radius:20px; padding:2px 10px; font-size:11px; font-family:'JetBrains Mono',monospace;">📄 Page ${escapeHtml(String(page))}</span>
+                            <span style="background:rgba(255,255,255,0.04); color:var(--text-muted); border:1px solid var(--border); border-radius:20px; padding:2px 10px; font-size:11px; font-family:'JetBrains Mono',monospace;">Chunk #${s.chunk_index}</span>
+                            <span style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:12px; font-weight:600; color:${scoreColor};">▲ ${score}% similarité</span>
+                        </div>
+                        <!-- Excerpt -->
+                        <div style="font-size:12px; color:var(--text-muted); line-height:1.65; background:rgba(0,0,0,0.2); padding:10px 14px; border-radius:6px; border-left:3px solid ${scoreColor}; font-family:'Inter',sans-serif; white-space:pre-wrap; max-height:120px; overflow-y:auto;">${escapeHtml(s.chunk_text.substring(0,400))}${s.chunk_text.length>400?'<span style="color:'+scoreColor+';">…</span>':''}</div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        // Optional: mark all nav items in phase B as done
+        const navs = document.querySelectorAll('.nav-section')[1].querySelectorAll('.nav-item');
+        navs.forEach(n => n.classList.add('done'));
+
+        activateNav('b4'); // Jump directly to generation output
+    } catch(e) {
+        document.getElementById('loading-overlay').classList.remove('active');
+        alert(e.message);
+    }
+}
+
+function colorizePrompt(text) {
+    let esc = escapeHtml(text);
+    esc = esc.replace(/Context information is below\./g, '<span class="code-comment">Context information is below.</span>');
+    esc = esc.replace(/Given the context information/g, '<span class="code-comment">Given the context information</span>');
+    esc = esc.replace(/Document:/g, '<span class="code-kw">Document:</span>');
+    return esc;
+}
+
+function escapeHtml(unsafe) {
+    return (unsafe||'').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+</script>
 </body>
 </html>
