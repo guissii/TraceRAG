@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     # LLM Configuration
     OLLAMA_BASE_URL: str = "http://localhost:11434"
-    OLLAMA_MODEL: str = "mistral"
+    OLLAMA_MODEL: str = "phi3"
     
     # Storage Configuration
     CHROMA_PATH: str = "./chroma_data"
