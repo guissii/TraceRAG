@@ -1,0 +1,728 @@
+[Page 1]
+Cours des réseaux Informatiques
+(2010-2011)
+Rziza Mohammed
+rziza@fsr.ac.ma
+
+[Page 2]
+Andrew Tanenbaum : Réseaux, cours et exercices.
+Pascal Nicolas : cours des réseaux Informatiques, université
+d’Angers. www.info.univ-angers.fr/pub/pn
+Douglas Comer : TCP/IP, Architecture, protocoles, applications.
+Olivier Hoarau: introduction aux réseaux locaux et étendus
+Supports
+Olivier Hoarau: introduction aux réseaux locaux et étendus,
+www.funix.free.fr
+Radi Noureddine et al.: Programmation réseau sur TCP/IP,
+l’interface des SOCKETS.
+CD de Ramrami (cours, Articles…….)
+
+[Page 3]
+• Introduction aux réseaux informatique
+• Architecture des réseaux (Modèle OSI, TCP/IP)
+• Couche physique
+• Couche liaison de données
+• La couche réseau
+Sommaire
+• La couche transport
+• La couche application
+• Réseaux locaux
+• Réseaux TCP/IP
+• Sockets
+
+[Page 4]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+1. Définitions
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8.
+Modèles de références OSI et TCP/IP
+
+[Page 5]
+Définitions
+Réseau : C’est un ensemble d’ordinateurs (ou de périphériques)
+autonomes connectés entre eux et qui sont situés dans un
+certain domaines géographiques.
+
+[Page 6]
+Les
+Réseaux
+informatiques
+sont
+nés
+du
+besoin
+de
+faire
+communiquer des terminaux distants avec un site central puis
+des ordinateurs entre eux.
+Définitions
+Dans un premier temps ces communications étaient juste destinées
+aux transports de données informatiques alors qu'aujourd'hui on
+se dirige plutôt vers des réseaux qui intègrent à la fois des
+données mais en plus, la parole, et la vidéo.
+
+[Page 7]
+Station de travail : On appelle station de travail toute machine capable
+d’envoyer des données vers les réseaux (PC, MAC,
+SUN Terminal X, …).
+Définitions
+Nœud : C’est une station de travail, une imprimante, un serveur ou toute
+entité pouvant être adressée par un numéro unique.
+Serveur : Dépositaire centrale d’une fonction spécifique : service de base
+de donnée, de calcul, de fichier, mail, ….
+
+[Page 8]
+Paquet : C’est la plus petite unité d’information pouvant être envoyer sur le
+réseau. Un paquet contient en général l’adresse de l’émetteur,
+l’adresse du récepteur et les données à transmettre.
+Topologie : Organisation physique et logique d’un réseau. L’organisation
+Définitions
+physique concerne la façon dont les machines sont connectés
+(Bus, Anneau, Étoile ….). La topologie logique montre comment
+les informations circulent sur les réseaux (diffusion ou point à
+point).
+
+[Page 9]
+Définitions
+Réseaux Homogènes : Tous les ordinateurs sont de même
+constructeurs : Aple-Talk
+Réseaux Hétérogènes : Les ordinateurs reliés au réseau sont
+de constructeurs divers : Ethernet.
+
+[Page 10]
+Définition d’un protocole
+Un protocole est un ensemble de règles destinées à une tâche de
+communication particulière.
+Deux ordinateurs doivent utiliser le même protocole pour
+p
+p
+pouvoir communiquer entre eux. En d ’autres termes, il
+doivent parler le même langage pour se comprendre.
+HUB, Répéteur, Pont, Passerelle……..
+
+[Page 11]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+Types de réseaux
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+
+[Page 12]
+Types des réseaux
+Suivant la distances qui sépare les ordinateurs, on distingue plusieurs
+catégorie de réseaux :
+•
+Les LAN : Local Area Network
+•
+Les MAN : Metropolitan Area Network
+•
+Les WAN : Wide Area Network
+
+[Page 13]
+Réseau LAN
+•
+Le LAN : (Local Area Network = réseau local d'entreprise)
+ou encore appelé réseau local, constitué d'ordinateurs et de
+périphériques reliés entre eux et implantés dans une même
+entreprise, et à caractère privé.
+•
+Il ne dépasse pas généralement la centaine de machines et ne
+dessert jamais au-delà du kilomètre.
+dessert jamais au delà du kilomètre.
+•
+Le partage des ressources est ici fréquent et les vitesses de
+transmissions vont de 10 à 100 Mb/s (mega-bits/seconde).
+•
+Nous allons (plus tard) analyser les différentes architectures des
+réseaux locaux : IEEE 802.x
+
+[Page 14]
+Réseau MAN
+•
+Le MAN : (Metropolitan Area Network = Réseau métropolitain ou urbain)
+correspond à la réunion de plusieurs réseaux locaux (LAN) à
+l'intérieur d'un même périmètre d'une très grande Entreprise ou
+d'une ville par ex. pouvant relier des points distants de 10 à 25
+Km.
+E
+é é l l
+âbl
+i l
+t l
+t h
+i
+l
+l
+•
+En général le câble co-axial est le support physique le plus
+utilisé dans ce type de réseau.
+•
+Il existe alors une interconnexion qui nécessite quelques
+matériels particuliers conçus pour réunir ces différents réseaux et
+aussi pour protéger l'accès de chacun d'eux suivant des
+conventions préalables
+
+[Page 15]
+Réseau MAN
+•
+Peut être privé ou public.
+•
+Utilise un ou deux câbles de transmission.
+•
+Pas d’éléments de commutation (routage).
+•
+Norme spéciale IEEE-802.6.
+•
+Pour envoyer une information à un ordinateur à droite, utiliser
+le bus A; sinon utiliser le bus B.
+
+[Page 16]
+Réseau WAN
+•
+Le WAN : (Wide Area Network = réseau grande distance)
+Il s'agit cette fois d'un réseau multi-services couvrant un pays ou
+un groupe de pays, qui est en fait constitué d'un ensemble de
+réseaux locaux interconnectés.
+•
+Un WAN peut être privé ou public, et les grandes distances qu'il
+couvre (plusieurs centaines de kms) font que les liaisons sont
+couvre (plusieurs centaines de kms) font que les liaisons sont
+assurés par du matériel moins sophistiqué (raisons financières) et
+le débit s'en trouve un peu pénalisé.
+Il est maintenant plus facile de comprendre pourquoi différentes structures
+de réseaux peuvent être d'une part exploités localement, et d'autre part
+interconnectés pour en élargir le périmètre d'exploitation.
+
+[Page 17]
+Réseau WAN
+•
+Étendue = une région, un continent.
+•
+Sous-réseau de commutation :
+Ensemble de commutateurs reliés
+entre eux.
+•
+Un commutateur (routeur) :
+ordinateur spécialisé qui permet
+ordinateur spécialisé qui permet
+d’acheminer des paquets.
+•
+Quelques topologies possibles d’un
+sous-réseau : (a) étoile, (b) anneau,
+(c) arbre, (d) maillage
+régulier, (e) anneau-
+interconnecté, (f) maillage
+irrégulier.
+
+[Page 18]
+Réseaux sans fil (wireless networks)
+
+[Page 19]
+BUS
+LAN
+MAN
+WAN
+Débit
+100M
+10M
+1M
+100K
+ADSL
+RNIS
+RTC
+Distance
+100K
+10K
+1K
+0
+0
+1
+10
+100
+1K
+10K
+100K
+1M
+
+[Page 20]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+Topologies
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+
+[Page 21]
+Anneau
+Etoile
+Topologies des Réseaux
+Bus
+
+[Page 22]
+Un réseau de type bus est ouvert à ses extrémités. Chaque PC y est connecté
+par l'intermédiaire d'un connecteur spécial. Certains périphériques, comme
+des imprimantes, peuvent également être directement reliés au réseau. ils
+doivent alors comporter une carte adaptateur réseau.
+A chaque extrémité, le réseau est terminé par une résistance (appelé bouchon)
+pour empêcher l'apparition de signaux parasites.
+L'exemple le plus courant de ce type de réseau est le réseau Ethernet
+Le réseau de type bus
+L exemple le plus courant de ce type de réseau est le réseau Ethernet.
+Avantage : ce type de montage est simple à mettre en oeuvre et peu coûteux.
+Inconvénient : s'il y a rupture du câble, tout le réseau tombe en panne.
+
+[Page 23]
+Dans un réseau en étoile, chaque nœud du réseau est relié à un contrôleur (ou
+hub) par un câble différent. Le contrôleur est un appareil qui recevant un
+signal de données par une de ses entrées, va retransmettre ce signal à chacune
+des autres entrées sur lesquelles sont connectés des ordinateurs ou
+périphériques, voir d'autres contrôleurs.
+Avantage : Un nœud peut tomber en panne sans affecter les autres nœuds du réseau.
+Inconvénient : Ce type d'architecture est plus coûteux que les réseaux en bus et en
+anneau En effet la longueur du câblage est importante ce qui entraîne un coût
+Le réseau en étoile
+anneau. En effet, la longueur du câblage est importante, ce qui entraîne un coût
+supplémentaire. De plus le contrôleur est un élément relativement cher. D'autre part,
+une panne du contrôleur provoque la déconnexion du réseau de tous les noeuds qui y
+sont reliés.
+
+[Page 24]
+Il s'agit d'un réseau local dans lequel les nœuds sont reliés en
+boucle fermée
+Le réseau en anneau
+
+[Page 25]
+Aucun de ces trois plans de câblage n'est idéal et le choix de l'un ou
+l'autre sera influencé par des questions de coût, de configuration du
+site auquel le réseau est destiné.
+Pour optimiser le fonctionnement d'un réseau sans atteindre des
+coûts exorbitants on peut utiliser conjointement plusieurs
+En conclusion
+coûts exorbitants, on peut utiliser conjointement plusieurs
+architectures.
+Les petits réseaux sont souvent basés sur une seule topologie, mais
+les plus grands réseaux peuvent inclure les trois types.
+
+[Page 26]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+Comment transmettre une information sur un réseau ?
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+Comment transmettre une information sur un réseau ?
+
+[Page 27]
+Mode de diffusion
+Mode de diffusion : consiste à partager un seul support de transmission.
+Chaque message envoyé par un équipement sur le réseau est reçu par
+tous les autres.
+Adresse physique/logique: C’est l’adresse spécifique placé dans le
+message qui permettra à chaque équipement de déterminer si le
+message lui est adressé ou non.
+
+[Page 28]
+Mode de diffusion
+Mode de diffusion : consiste à partager un seul support de transmission.
+Chaque message envoyé par un équipement sur le réseau est reçu par
+tous les autres.
+
+[Page 29]
+Mode de diffusion
+A tout moment chaque équipement à le droit d’envoyer un message sur
+le support, il faut juste écouter au préalable si la voie est libre, sinon il
+doit attendre.
+Les réseaux locaux adoptent pour la plupart des cas, le mode diffusion
+sur une architecture en bus ou en anneau.
+La rupture du support provoque l’arrêt du réseau, par contre la panne
+d’un des élément ne provoque pas la pane globale du réseau.
+
+[Page 30]
+Mode de point à point
+Mode de point à point : le support physique (câble) relie une paire
+d’équipement seulement.
+Quand deux équipement non directement connecter entre eux veulent
+communiquer, ils le font par l’intermédiaire des autres nœuds du réseau.
+D
+b
+l
+i
+l
+h
+d
+it
+d
+i i
+Dans une boucle simple: chaque nœud reçoit un message de son voisin
+en amont et le réexpédie à son voisin en aval.
+Pour que les messages ne tournent pas indéfiniment, le nœud émetteur
+retire le message lorsqu’il lui revient.
+En cas de panne d’un élément, le réseau tombe en panne.
+
+[Page 31]
+Mode de point à point
+Topologie double boucle: chaque boucle fait tourner les messages dans
+un sens opposé.
+En cas de panne d’un équipement, on reconstruit une boucle simple avec
+les éléments actifs des deux boucles, mais dans ce cas, tout message
+passera deux fois par chaque nœud. Il en résulte une gestion très
+complexe.
+Maillage régulier: l’interconnexion est totale ce qui assure une fiabilité
+optimale du réseau, par contre c ’est une solution coûteuse en cablage.
+Si on allège le plan de câblage, le maillage devient irrégulier et la
+fiabilité peut rester élevée, mais il nécessite un routage des messages
+selon des algorithmes très complexes.
+
+[Page 32]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+Mode de fonctionnement d’un réseau
+
+[Page 33]
+Mode de fonctionnement d’un réseau
+Mode avec connexion : toute communication entre 2 équipements
+suit le processus suivant:
+1) L'émetteur demande l'établissement d’une connexion par
+l’envoie d’un bloc de données spéciales.
+2) Si le récepteur refuse cette connexion la communication
+n’a pas lieu.
+3) Si l
+i
+t
+té
+ll
+t ét bli
+i
+3) Si la connexion est acceptée, elle est établie par mise en
+place d’un circuit virtuel dans le réseau reliant l'émetteur
+au récepteur.
+4) Les données sont ensuite transférées d’un point à l’autre.
+5) La connexion est libérée.
+C ’est le fonctionnement bien connu du réseau téléphonique
+classique.
+
+[Page 34]
+Mode de fonctionnement d’un réseau
+Mode sans connexion : les blocs de données, appelés datagramme,
+sont émis sans vérifier à l’avance si l’équipement à atteindre, ainsi que
+les nœuds intérimaires éventuels, sont bien actifs. C’est alors aux
+équipements gérant le réseau d’acheminer le message étape par étape
+et en assurant éventuellement sa temporisation jusqu’à ce que le
+destinataire soit actif.
+Ce service est celui du courrier postal classique et suit les principes
+p
+q
+p
+p
+généraux suivants:
+1) Le client poste une lettre dans une boite aux lettres
+2) Chaque client à une @ propre et une boite aux lettres
+3) Le contenu de l’information reste inconnu
+4) Les supports du transport sont inconnus de l’utilisateur du
+service.
+
+[Page 35]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+Qu’apporte les réseaux ?
+
+[Page 36]
+Qu’apportent les réseaux ?
+Les réseaux permettent :
+• Le partage des fichiers
+• Le partage d’application : compilation, SGBD
+• Partage de ressources matérielles : l’imprimante, disque…
+• Télécharger des applications et des fichiers
+g
+pp
+• L’interaction avec les utilisateurs connectés : messagerie
+électronique, conférences électroniques, ….
+• Le transfert de données en général: réseaux informatiques
+• Les transfert de la parole : réseaux téléphoniques
+• Le transfert de la parole, de la vidéo et des données : réseaux
+numérique à intégration de services RNIS ou sur IP.
+
+[Page 37]
+Qu’apportent les réseaux ?
+Usage des réseaux : (apport aux entreprises)
+• Partager des ressources: imprimantes, disque dur, processeur, etc.
+• Réduire les coûts:
+Exemple: au lieu d’avoir une imprimante pour chaque
+utilisateur qui sera utilisée 1 heure par semaine,
+on partage cette même imprimante entre plusieurs
+utilisateurs
+utilisateurs.
+Remarque: Les grands ordinateurs sont généralement 10 fois
+plus rapides et coûtent 1000 fois plus chers.
+• Augmenter la fiabilité: dupliquer les données et les traitements
+sur plusieurs machines. Si une machine
+tombe en panne une autre prendra la relève.
+• Fournir un puissant média de communication: e-mail, VC …..
+• Faciliter la vente directe via l’Internet.
+
+[Page 38]
+Qu’apportent les réseaux ?
+Usage des réseaux : (apports aux individus)
+• Accès facile et rapide à des informations distantes:
+Informations de type financier: Paiement de factures,
+consultation de solde, etc.
+Recherche d’informations de tout genre : sciences, arts,
+cuisine, sports, etc.;
+Accès à des journaux et bibliothèques numériques: News …
+j
+q
+q
+• Communication entre les individus : Vidéoconférence, courrier
+électronique, groupes thématiques (newsgroups), clavardage
+(chat), communication poste-à-poste (peer-to-peer),
+téléphonie et radio via Internet, etc.
+• Divertissements et jeux interactifs : vidéo à la carte et toutes
+sortes de jeux (jeux d’échec, de combats, etc.)
+• Commerce électronique (e-commerce) : transactions
+financières, achats en ligne à partir de son domicile.
+
+[Page 39]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+Logiciels réseaux
+
+[Page 40]
+Logiciels de réseaux
+• Réseau : matériels + logiciels.
+• Logiciel : on a besoin d’implanter un grand nombre de fonctions
+(détection et correction d’erreurs, contrôle de flux, routage, etc.)
+pour pouvoir communiquer convenablement.
+• Problème : les fonctions à implanter sont nombreuses et complexes.
+• Quoi faire?: regrouper les fonctions en modules (diviser pour
+régner)  réduire un problème complexe en plusieurs petits
+problèmes.
+• Comment faire le découpage?: utiliser les techniques de génie
+logiciel (couplage, modularité, encapsulation, etc.).
+
+[Page 41]
+Logiciels de réseaux
+Résultat du découpage:
+• Plusieurs couches.
+• Une couche = un niveau d’abstraction
+• Une couche n utilise les services de la couche n-1 et ses
+propres moyens pour offer des services plus appropriés à la
+couche n+1.
+• Relation entre les couches n et n-1
+n: utilisateur des services.
+n-1: fournisseur des services.
+• Nombre/nom/fonction des couches varie selon le réseau.
+
+[Page 42]
+Logiciels de réseaux
+• Pouvoir envoyer et recevoir des bits sur un réseau ne suffit pas pour
+communiquer convenablement.
+• Communiquer  pouvoir interpréter l’information échangée 
+parler le même langage.
+• Langage = syntaxe + sémantique
+• Les messages envoyés doivent être interprétés correctement par le
+Les messages envoyés doivent être interprétés correctement par le
+récepteur. Si les 8 premiers d’un message contiennent
+l’adresse source et celui qui le reçoit considère les 8 derniers
+bits comme adresse source  il y aura un problème…
+• Donc pour pouvoir communiquer convenablement, les interlocuteurs
+doivent s’entendre sur les syntaxes et les sémantiques des
+messages échangés  on a besoin des protocoles.
+
+[Page 43]
+Logiciels de réseaux
+• Protocole : Ensemble de règles et des conventions décrivant la
+syntaxe et la sémantique des messages échangés et la façon
+dont la transmission se déroule.
+* Syntaxe
+- les différents champs qu’on trouve dans chaque message
+Le nombre de bits occupé par chaque champ
+- Le nombre de bits occupé par chaque champ.
+* Sémantique: la signification de chaque champ.
+• Chaque couche utilise ses propres protocoles pour communiquer
+avec son homologue (entités homologues).
+• Aucune donnée n’est transférée directement de la couche n (n>1)
+d’une machine à la couche n d’une autre machine..
+
+[Page 44]
+Logiciels de réseaux
+• Pour que la couche n+1 puisse utiliser la couche n, elle doit
+connaître l’interface de cette dernière.
+• Une interface définit les opérations élémentaires et les
+services qu’une couche inférieure offre à sa supérieure.
+• Architecture d’un réseau = ensemble de couches et de
+protocoles.
+Remarque: La spécification d’une architecture doit contenir
+suffisamment d’information pour permettre l’écriture
+de programmes et la construction de matériels de
+chaque couche.
+
+[Page 45]
+1. Définitions
+2. Types de réseaux
+3. Topologies
+4
+Comment transmettre une information sur un réseau ?
+Plan
+4. Comment transmettre une information sur un réseau ?
+5. Mode de fonctionnement d’un réseau
+6. Qu’apporte les réseaux ?
+7. Logiciels réseaux
+8. Modèles de références OSI et TCP/IP
+Modèles de références OSI et TCP/IP
+
+[Page 46]
+Normalisation
+• Qu’est ce qu’une norme?: Des accords documentés décrivant
+des spécifications des produits ou des services.
+* Exemple: format d’une carte bancaire (longueur, largeur,
+épaisseur, position de la bande magnétique, etc.).
+• Pourquoi une norme?: Éliminer les incompatibilités entre les
+produits et les services.
+produits et les services.
+* Si on ne parle pas le même « langage », alors comment
+peut-on communiquer et se comprendre?
+• Qui définit les normes?: des organismes nationaux (SCC
+« Standards Council of Canada », AFNOR « France »,
+ANSI « USA ») et internationaux (ISO « International
+Organization for Standardization »).
+
+[Page 47]
+Architecture des réseaux
+Deux grandes familles d’architectures se disputent le marché :
+• La première provient de l’ISO et s’appelle OSI (Open System
+Interconnexion)
+• La deuxième est TCP/IP
+• Une Troisième architecture plus récente est UIT-T (Union
+Internationale de Télécommunication).
+Il s’agit de l’adaptation du modèle OSI pour prendre en compte le
+réseaux haut-débit.
+
+[Page 48]
+Le modèle de référence OSI
+
+[Page 49]
+Définition Succinctes des couches
+Couche physique : Assure le transfert de bits, on trouve dans
+cette couche:
+• L’étude des interfaces de connexion.
+• L’étude des modems, des multiplexeurs et concentrateurs.
+Couche liaison de données : Responsable de l’acheminement
+d’unités de données appelées trames en assurant la meilleure
+qualité de transmission possible. Le protocole standard est
+HDLC
+
+[Page 50]
+Définition Succinctes des couches
+Couche réseaux : Transporte des unités de données de taille fixe
+appelés paquets. Exemples de protocoles
+standards : X25 et IP.
+Couche transport : Transport des unités de données appelées
+messages. Le protocole TCP et UDP et
+TCP/IP
+
+[Page 51]
+Définition Succinctes des couches
+Couche session : Assure l'établissement et le contrôle de séances de
+communication
+Couche présentation : Présentation globale et unifiée de l’information,
+interprétation, cryptage, compression de
+p
+yp g
+p
+données.
+Couche Application : Application spécifiques, comme Telnet, FTP,
+rlogin, SSH….
+
+[Page 52]
+Architecture TCP/IP
+• Architecture définie par la défense américaine (DoD).
+• Le but est la connexion de plusieurs réseaux utilisant des
+protocoles de communication différents et incompatibles.
+
+[Page 53]
+Analogie TCP/IP et modèle ISO
+
+[Page 54]
+Exemple de communication entre machines du même réseau TCP/IP
+
+[Page 55]
+Exemple de communication
+• Il est important de comprendre la différence entre :
+* communication virtuelle et
+* communication effective
+- Les processus pairs de la couche N conçoivent leur communication
+de façon horizontale grâce au protocole de la couche N  une
+communication virtuelle.
+- La communication effective se fait avec les couches inférieures par
+l’interface.
+
+[Page 56]
+Transmission de donnée
+
+[Page 57]
+Interconnexion de deux réseaux différents
+
+[Page 58]
+La couche physique
+• Codage de l’information
+• Transmission des données
+• Multiplexeurs
+• Moyens de transmission
+• Moyens de transmission
+• Différents modes de transmission
+• Les modems
+• Le réseau téléphonique pour la transmission de donnée

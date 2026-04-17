@@ -38,8 +38,10 @@ class RAGEngine:
     ):
         self.chroma_store = ChromaStore(persist_directory=chroma_path)
         try:
-            self.embedding_model = SentenceTransformer(model_name)
-            logger.info(f"Embedding model '{model_name}' loaded successfully")
+            import torch
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+            self.embedding_model = SentenceTransformer(model_name, device=device)
+            logger.info(f"Embedding model '{model_name}' loaded successfully on {device.upper()}")
         except Exception as e:
             logger.error(f"Failed to load embedding model: {e}")
             raise

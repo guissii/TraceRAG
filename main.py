@@ -1,4 +1,5 @@
 import os
+import uuid
 import shutil
 import tempfile
 from pathlib import Path
@@ -22,19 +23,15 @@ rag_engine: Optional[RAGEngine] = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """
-    Lifespan manager for the FastAPI application.
-    Initializes the RAG Engine on startup.
-    """
+    """Lifespan manager: initializes the RAG Engine on startup."""
     global rag_engine
     try:
         rag_engine = RAGEngine()
-        logger.info(f"RAG Engine initialized successfully (Model: {settings.OLLAMA_MODEL})")
+        logger.info(f"RAG Engine initialized (LLM: {settings.OLLAMA_MODEL}, Embedding: {settings.EMBEDDING_MODEL_NAME})")
     except Exception as e:
         logger.error(f"Failed to initialize RAG Engine: {e}")
-        # We don't raise here to allow the app to start and show errors in health check
     yield
-    logger.info("RAG Explorer shutting down")
+    logger.info("TraceRAG shutting down")
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -42,7 +39,7 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -56,7 +53,8 @@ STATIC_DIR = Path(__file__).parent / "frontend"
 if STATIC_DIR.exists():
     app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 
-# Models
+# ─── Models ─────────────────────────────────────
+
 class ChatRequest(BaseModel):
     question: str
     n_chunks: int = 5
@@ -75,6 +73,8 @@ class PipelineStep(BaseModel):
     duration_ms: int
     status: str
     chunks_found: Optional[int] = None
+    prompt_tokens: Optional[int] = None
+    context_chunks: Optional[int] = None
 
 class ChatResponse(BaseModel):
     question: str
@@ -95,21 +95,31 @@ class HealthResponse(BaseModel):
     embedding_model: str
     llm_model: str
     total_chunks: int
+    chunk_size: int
+    chunk_overlap: int
 
 class ChunkDetail(BaseModel):
     text: str
     index: int
     token_count: int
 
+class StepTiming(BaseModel):
+    extraction: Optional[int] = None
+    chunking: Optional[int] = None
+    embedding: Optional[int] = None
+    storage: Optional[int] = None
+
 class IndexResponse(BaseModel):
     document_name: str
     chunks_count: int
     char_count: int
     total_time_ms: int
+    step_timings: StepTiming
     message: str
     all_chunks: List[ChunkDetail]
 
-# Endpoints
+# ─── Endpoints ──────────────────────────────────
+
 @app.get("/")
 async def root():
     index_path = STATIC_DIR / "index.html"
@@ -127,7 +137,9 @@ async def health_check():
         status="healthy",
         embedding_model=stats["embedding_model"],
         llm_model=stats["llm_model"],
-        total_chunks=stats["total_chunks"]
+        total_chunks=stats["total_chunks"],
+        chunk_size=stats["chunk_size"],
+        chunk_overlap=stats["chunk_overlap"]
     )
 
 @app.post("/upload", response_model=IndexResponse)
@@ -135,23 +147,35 @@ async def upload_document(file: UploadFile = File(...)):
     if not rag_engine:
         raise HTTPException(status_code=503, detail="RAG Engine not initialized")
 
-    allowed_types = ["application/pdf", "text/plain"]
+    allowed_types = [
+        "application/pdf", 
+        "text/plain", 
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+    ]
     if file.content_type not in allowed_types:
-        raise HTTPException(status_code=400, detail="Only PDF and TXT files are supported")
+        raise HTTPException(status_code=400, detail="Only PDF, TXT, and DOCX files are supported")
 
-    file_ext = "pdf" if file.content_type == "application/pdf" else "txt"
+    # Check file size
+    content = await file.read()
+    file_size_mb = len(content) / (1024 * 1024)
+    if file_size_mb > settings.MAX_FILE_SIZE_MB:
+        raise HTTPException(status_code=400, detail=f"File too large ({file_size_mb:.1f}MB). Max: {settings.MAX_FILE_SIZE_MB}MB")
+
+    if file.content_type == "application/pdf":
+        file_ext = "pdf"
+    elif file.content_type == "text/plain":
+        file_ext = "txt"
+    else:
+        file_ext = "docx"
+
     original_name = file.filename or f"doc_{uuid.uuid4().hex[:8]}.{file_ext}"
 
     temp_dir = tempfile.mkdtemp()
     temp_path = os.path.join(temp_dir, original_name)
 
     try:
-        content = await file.read()
-        char_count = len(content)
-        await file.seek(0)
-        
         with open(temp_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+            buffer.write(content)
 
         result = rag_engine.index_document(
             file_path=temp_path,
@@ -162,11 +186,15 @@ async def upload_document(file: UploadFile = File(...)):
         return IndexResponse(
             document_name=result["document_name"],
             chunks_count=result["chunks_count"],
-            char_count=char_count,
+            char_count=result["char_count"],
             total_time_ms=result["total_time_ms"],
-            message=f"Successfully indexed {result['chunks_count']} chunks",
+            step_timings=StepTiming(**result["step_timings"]),
+            message=f"{result['chunks_count']} chunks indexés avec succès en {result['total_time_ms']}ms",
             all_chunks=[ChunkDetail(**c) for c in result["all_chunks"]]
         )
+    except ValueError as e:
+        logger.error(f"Upload validation error: {e}")
+        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         logger.error(f"Upload error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
@@ -187,17 +215,23 @@ async def delete_document(document_name: str):
     success = rag_engine.delete_document(document_name)
     if not success:
         raise HTTPException(status_code=500, detail="Failed to delete document")
-    return {"message": f"Document {document_name} deleted"}
+    return {"message": f"Document '{document_name}' supprimé avec succès"}
 
 @app.post("/chat", response_model=ChatResponse)
 async def chat(request: ChatRequest):
     if not rag_engine:
         raise HTTPException(status_code=503, detail="RAG Engine not initialized")
 
+    question = request.question.strip()
+    if not question:
+        raise HTTPException(status_code=400, detail="La question ne peut pas être vide")
+    if len(question) > 2000:
+        raise HTTPException(status_code=400, detail="Question trop longue (max 2000 caractères)")
+
     try:
         result = rag_engine.chat(
-            question=request.question,
-            n_chunks=request.n_chunks,
+            question=question,
+            n_chunks=min(request.n_chunks, 10),
             document_name=request.document_name
         )
         return ChatResponse(**result)
@@ -207,7 +241,6 @@ async def chat(request: ChatRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    import uuid # Needed for filename generation
     uvicorn.run(
         "main:app",
         host=settings.API_HOST,

@@ -34,13 +34,21 @@ start "Ollama-GPU" /min cmd /k "set CUDA_VISIBLE_DEVICES=0 && set OLLAMA_LLM_LIB
 echo     Ollama GPU (cuda_v12) demarre... Attente 6s...
 timeout /t 6 /nobreak >nul
 
-echo [4/5] Installation des dependances...
+echo [4/5] Installation des dependances et verification GPU...
 python -m pip install --upgrade pip >nul 2>&1
 python -m pip install fastapi uvicorn python-multipart sentence-transformers chromadb PyMuPDF httpx pydantic pydantic-settings python-docx >nul 2>&1
 if errorlevel 1 (
-    echo ERREUR: Echec de l'installation des dependances
+    echo ERREUR: Echec de l'installation des dependances de base
     pause
     exit /b 1
+)
+
+python -c "import torch; exit(0 if torch.cuda.is_available() else 1)" >nul 2>&1
+if errorlevel 1 (
+    echo [!] PyTorch CUDA non detecte. 
+    echo [!] Telechargement de la version optimisee GPU ^(CUDA 12.1^) - env 2.5 Go, veuillez patienter...
+    python -m pip uninstall -y torch torchvision torchaudio >nul 2>&1
+    python -m pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 )
 
 echo [5/5] Lancement du serveur TraceRAG...
