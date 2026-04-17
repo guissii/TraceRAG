@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+build/
+dist/
+*.egg-info/
+
+# Data and logs
+chroma_data/
+*.log
+
+# Git
+.git/
+.gitignore
+
+# IDE
+.vscode/
+.idea/
+
+# Docker (don't copy into image)
+docker-compose.yml
+docker-compose.override.yml
+.dockerignore
+
+# Environment
+.env
+.env.example
+
+# Tests and docs
+test_docs/
+README.md
+LICENSE
+
+# Scripts
+*.bat

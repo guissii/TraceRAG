@@ -57,7 +57,7 @@ if STATIC_DIR.exists():
 
 class ChatRequest(BaseModel):
     question: str
-    n_chunks: int = 5
+    n_chunks: int = 4
     document_name: Optional[str] = None
 
 class SourceChunk(BaseModel):

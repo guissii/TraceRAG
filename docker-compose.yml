@@ -1,7 +1,7 @@
 services:
   ollama:
     image: ollama/ollama:latest
-    container_name: rag-ollama
+    container_name: tracerag-ollama
     ports:
       - "11434:11434"
     volumes:
@@ -15,27 +15,28 @@ services:
               capabilities: [gpu]
     environment:
       - OLLAMA_KEEP_ALIVE=24h
-      - OLLAMA_MODELS=/root/.ollama/models
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
       interval: 30s
       timeout: 10s
-      retries: 3
+      retries: 5
+      start_period: 30s
 
   rag-api:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: rag-api
+    container_name: tracerag-api
     ports:
       - "8000:8000"
     volumes:
-      - ./chroma_data:/app/chroma_data
+      - chroma_data:/app/chroma_data
     environment:
       - OLLAMA_BASE_URL=http://ollama:11434
       - OLLAMA_MODEL=phi3
       - CHROMA_PATH=/app/chroma_data
-      - DEBUG=False
+      - EMBEDDING_MODEL_NAME=all-MiniLM-L6-v2
+      - DEBUG=false
     depends_on:
       ollama:
         condition: service_healthy
@@ -45,10 +46,12 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 15s
 
 volumes:
   ollama_data:
+  chroma_data:
 
 networks:
   default:
-    name: rag-network
+    name: tracerag-network

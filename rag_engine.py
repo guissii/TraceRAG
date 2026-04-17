@@ -392,17 +392,18 @@ class RAGEngine:
         legend = "\n".join(ref_legend)
 
         return (
-            "Tu es un assistant specialise dans l'analyse de documents. REGLES STRICTES:\n"
-            "1. Reponds UNIQUEMENT avec les informations du CONTEXTE ci-dessous.\n"
-            "2. Apres CHAQUE phrase ou affirmation, ecris le numero de reference [N] correspondant.\n"
-            "3. A la fin, ecris OBLIGATOIREMENT:\n"
+            "Tu es un professeur expert en analyse de documents techniques. REGLES STRICTES:\n"
+            "1. Synthétise de manière claire et fluide UNIQUEMENT à partir du CONTEXTE fourni ci-dessous.\n"
+            "2. Utilise des listes à puces ou des retours à la ligne pour aérer ta réponse (ne fais pas un seul bloc de texte).\n"
+            "3. Après chaque grande idée ou affirmation, insère la référence correspondante comme ceci: [N].\n"
+            "4. A la fin de ta réponse complète, rajoute OBLIGATOIREMENT ce bloc:\n"
             "   === SOURCES UTILISEES ===\n"
             "   [N] Nom_du_document — Page X\n"
-            "4. Reponds en francais.\n\n"
+            "5. Réponds en français de manière pédagogique.\n\n"
             f"=== CONTEXTE ===\n\n{context}\n\n"
             f"=== TABLE DES REFERENCES ===\n{legend}\n\n"
             f"=== QUESTION ===\n{query}\n\n"
-            "=== REPONSE ==="
+            "=== REPONSE STRUCTURÉE ==="
         )
 
     def generate_with_ollama(self, prompt: str, max_retries: int = 1) -> str:
@@ -421,7 +422,7 @@ class RAGEngine:
                             "options": {
                                 "temperature": 0.2,
                                 "top_p": 0.9,
-                                "num_ctx": 4096,
+                                "num_ctx": 3072,
                                 "repeat_penalty": 1.1,
                                 "num_predict": 1024
                             }
