@@ -1,197 +1,167 @@
-# TraceRAG
+<div align="center">
+  <h1>🔍 TraceRAG</h1>
+  <p><strong>A Production-Ready, 100% Local RAG Pipeline with Exact Source Traceability</strong></p>
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
-[![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
-[![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-blue)](https://ollama.com/)
-[![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+  [![FastAPI](https://img.shields.io/badge/FastAPI-005571?style=flat&logo=fastapi)](https://fastapi.tiangolo.com/)
+  [![Docker](https://img.shields.io/badge/Docker-2496ED?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+  [![Ollama](https://img.shields.io/badge/Ollama-Local_LLM-blue)](https://ollama.com/)
+  [![Python](https://img.shields.io/badge/Python-3.10+-3776AB?style=flat&logo=python&logoColor=white)](https://python.org/)
 
-> **Pipeline RAG complet avec traçabilité des sources.** Chaque réponse est liée à sa page d'origine — zéro hallucination, 100% local.
-
----
-
-## Overview
-
-**TraceRAG** est un système de Question-Answering intelligent qui transforme n'importe quel document (PDF, DOCX, TXT) en base de connaissances interrogeable. Chaque réponse inclut des citations précises avec le numéro de page exact.
-
-### Key Features
-- **Traçabilité complète** — Chaque affirmation cite sa source `[Page X]`
-- **Anti-hallucination** — Le LLM répond uniquement à partir du contexte documentaire
-- **100% local** — Aucune donnée ne quitte la machine, aucune API cloud payante
-- **GPU accelerated** — Embedding et inférence optimisés sur NVIDIA CUDA
-- **Multi-format** — Support PDF, DOCX et TXT
+  <i>Turn any document (PDF, DOCX, TXT) into an interactive, zero-hallucination knowledge base.</i>
+</div>
 
 ---
 
-## Architecture
+## 🌟 Overview
 
-```mermaid
-graph TD
-    subgraph Ingestion Pipeline
-        A[Document PDF/DOCX/TXT] --> B[1. Extraction]
-        B --> C[2. Chunking sémantique]
-        C --> D[3. Embedding GPU]
-        D --> E[4. ChromaDB Storage]
-    end
+**TraceRAG** is an intelligent Question-Answering system designed for absolute accuracy. Unlike traditional RAG (Retrieval-Augmented Generation) setups, TraceRAG guarantees that every generated response actively cites its exact source location `[Page X]`. It runs entirely on your local machine, ensuring absolute data privacy without the need for expensive cloud APIs.
 
-    subgraph Query Pipeline
-        F[User Question] --> G[1. Embed Query]
-        G --> H[2. Retrieval Top-K]
-        E --> H
-        H --> I[3. Prompt Augmentation]
-        I --> J[4. LLM Generation]
-        J --> K[Sourced Answer]
-    end
-```
+## ✨ Key Features
+
+- **🎯 Exact Traceability** — Every claim cites its direct source document and page number `[Page X]`.
+- **🚫 Zero Hallucinations** — Strict prompt engineering restricts the LLM exclusively to your provided documents.
+- **🔒 100% Local & Private** — No data leaves your machine. Powered by [Ollama](https://ollama.com/) and local embedding models.
+- **⚡ GPU Accelerated** — Optimized PyTorch + CUDA pipeline for blistering fast ingestion and inference.
+- **🔌 Plug-and-Play Setup** — Completely fully automated download and setup scripts for both Windows & Docker.
+- **📄 Multi-Format Support** — Seamlessly ingests PDF, DOCX, and TXT files.
 
 ---
 
-## Performance
+## 🚀 Quick Start (Plug-and-Play)
 
-Measured on a 58-page PDF (22,738 characters) with NVIDIA GPU + CUDA:
+We've made installation extremely frictionless. Whether you use Docker or Windows natively, downloading the repo and running one command will pull all dependencies, set up the environment, and download the LLM automatically.
 
-| Pipeline Step | Time | Details |
-|--------------|------|---------|
-| **Extraction** | 38 ms | Page-by-page parsing with `[Page N]` markers |
-| **Chunking** | 5 ms | 13 chunks (400 words, 60-word overlap) |
-| **Embedding** | 337 ms | 13 vectors × 384 dimensions (GPU CUDA) |
-| **Storage** | 54 ms | ChromaDB HNSW cosine index |
-| **Total Ingestion** | **437 ms** | Full document indexed |
-| **Query Response** | 16–25 s | Retrieval + augmentation + LLM inference |
-
----
-
-## Tech Stack
-
-| Component | Technology | Role |
-|-----------|-----------|------|
-| **Backend** | FastAPI + Uvicorn | REST API orchestration |
-| **Embeddings** | SentenceTransformers (`all-MiniLM-L6-v2`) | Semantic vectorization (384D) |
-| **Vector Store** | ChromaDB | HNSW index, cosine similarity |
-| **LLM** | Phi-3 via Ollama | Local inference (3.8B params) |
-| **GPU** | PyTorch + CUDA | Accelerated embedding & inference |
-| **Frontend** | HTML / CSS / JS | Real-time pipeline visualization |
-
----
-
-## Getting Started
-
-### Prerequisites
-- Python 3.10+
-- [Ollama](https://ollama.com/) installed and running
-- (Optional) NVIDIA GPU with CUDA support
-
-### Option 1: Docker (Recommended)
-
+### Option 1: Docker Compose (Recommended)
 ```bash
 git clone https://github.com/guissii/TraceRAG.git
 cd TraceRAG
-docker compose up --build
+docker-compose up --build
+```
+> **Note:** The setup will automatically pull the `phi3` model through Ollama in the background.
+
+### Option 2: Windows Native (One-Click)
+```bash
+git clone https://github.com/guissii/TraceRAG.git
+cd TraceRAG
+```
+👉 Simply double-click on `launch.bat`. 
+*It will automatically detect Python, create an isolated virtual environment, install GPU dependencies, start Ollama, and pull the required models completely hands-free.*
+
+**Once launched, the web dashboard will be available at:** [http://localhost:8000](http://localhost:8000)
+
+---
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    subgraph Ingestion Pipeline [1. Ingestion Pipeline]
+        A[Document PDF/DOCX] --> B[Extraction]
+        B -->|Page-Aware Parsing| C[Semantic Chunking]
+        C --> D[GPU Vector Embedding]
+        D --> E[(ChromaDB Vector Store)]
+    end
+
+    subgraph Query Pipeline [2. Query Pipeline]
+        F[User Question] --> G[Embed Query]
+        G --> H[Top-K Retrieval]
+        E -->|similarity search| H
+        H --> I[Prompt Augmentation]
+        I -->|Context+Query| J[Local LLM Generation]
+        J --> K[Sourced Answer w/ Page Refs]
+    end
 ```
 
-The app will be available at `http://localhost:8000`.
+---
 
-### Option 2: Local Installation
+## 📊 Performance Benchmarks
 
-1. **Clone & setup**:
-   ```bash
-   git clone https://github.com/guissii/TraceRAG.git
-   cd TraceRAG
-   python -m venv venv
-   venv\Scripts\activate        # Windows
-   # source venv/bin/activate   # Linux/Mac
-   pip install -r requirements.txt
-   ```
+*Measured on a 58-page PDF (22,738 characters) utilizing an NVIDIA GPU (CUDA).*
 
-2. **GPU acceleration** (optional but recommended):
-   ```bash
-   # Install PyTorch with CUDA support
-   pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
-   ```
-
-3. **Start Ollama & pull the model**:
-   ```bash
-   ollama serve
-   ollama pull phi3
-   ```
-
-4. **Run TraceRAG**:
-   ```bash
-   python main.py
-   ```
-
-5. **Open**: Navigate to `http://localhost:8000`
-
-### Quick Start (Windows)
-
-Double-click `launch.bat` — it handles everything automatically (Ollama, GPU detection, dependencies, server).
+| Pipeline Stage | Processing Time | Technical Details |
+|-----------------|-----------------|-------------------|
+| **Extraction** | 38 ms | Page-by-page parsing with preserved `[Page N]` metadata |
+| **Chunking** | 5 ms | Semantic splitting (400 words / 60-word overlap) |
+| **Embedding** | 337 ms | Rapid vectorization (384 dimensions) via CUDA |
+| **Storage** | 54 ms | HNSW Indexing via ChromaDB |
+| **Total Ingestion**| **~437 ms** | Complete document processed and deeply searchable |
+| **Query & Inference**| 16–25 s | End-to-end local inference returning a sourced response |
 
 ---
 
-## Configuration
+## 🛠️ Tech Stack
 
-Copy `.env.example` to `.env` and adjust:
-
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `OLLAMA_BASE_URL` | `http://localhost:11434` | Ollama server URL |
-| `OLLAMA_MODEL` | `phi3` | LLM model name |
-| `EMBEDDING_MODEL_NAME` | `all-MiniLM-L6-v2` | Embedding model |
-| `CHROMA_PATH` | `./chroma_data` | Vector DB storage path |
-| `CHUNK_SIZE` | `400` | Words per chunk |
-| `CHUNK_OVERLAP` | `60` | Overlap between chunks |
+- **Backend:** FastAPI + Uvicorn 
+- **Embeddings:** SentenceTransformers (`all-MiniLM-L6-v2`)  
+- **Vector Core:** ChromaDB (HNSW, Cosine Similarity)
+- **Local LLM:** Phi-3 (3.8B params) via Ollama
+- **Hardware Acceleration:** PyTorch + CUDA
+- **Frontend Dashboard:** HTML5, CSS3, & Vanilla JS (Dynamic & Responsive UI)
 
 ---
 
-## API Endpoints
+## ⚙️ Configuration
 
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `GET` | `/` | Frontend dashboard |
-| `GET` | `/health` | System status & stats |
-| `POST` | `/upload` | Index a document (PDF/DOCX/TXT) |
-| `GET` | `/documents` | List indexed documents |
-| `DELETE` | `/documents/{name}` | Remove a document |
-| `POST` | `/chat` | Query the RAG pipeline |
+Customizing TraceRAG is easy. Copy `.env.example` to `.env` and adjust the variables:
+
+| Variable | Default Value | Description |
+|----------|---------------|-------------|
+| `OLLAMA_BASE_URL` | `http://localhost:11434` | Your Ollama Server URL |
+| `OLLAMA_MODEL` | `phi3` | Choose your preferred LLM |
+| `EMBEDDING_MODEL_NAME` | `all-MiniLM-L6-v2` | Dense retrieval model |
+| `CHROMA_PATH` | `./chroma_data` | Persistent local DB storage point |
+| `CHUNK_SIZE` | `400` | Text granularity for embeddings |
 
 ---
 
-## Project Structure
+## 🌐 API Reference
 
-```
+Easily integrate TraceRAG into your own applications using our RESTful endpoints:
+
+| Endpoints | Methods | Description |
+|-----------|---------|-------------|
+| `/` | `GET` | Main UI Dashboard |
+| `/health` | `GET` | System heartbeat and component statuses |
+| `/upload` | `POST` | Ingest and index new documents |
+| `/documents` | `GET` | Retrieve list of all indexed files |
+| `/documents/{name}` | `DELETE`| Remove a document from the Vector Store |
+| `/chat` | `POST` | Core RAG Query Engine |
+
+---
+
+## 📂 Repository Structure
+
+```text
 TraceRAG/
-├── main.py              # FastAPI application & endpoints
-├── rag_engine.py        # RAG pipeline (extraction, chunking, embedding, generation)
-├── chroma_store.py      # ChromaDB wrapper
-├── config.py            # Configuration (Pydantic Settings)
-├── logging_config.py    # Logging setup
-├── requirements.txt     # Python dependencies
-├── frontend/
-│   └── index.html       # Dashboard UI
-├── Dockerfile           # Multi-stage Docker build
-├── docker-compose.yml   # Full stack (API + Ollama)
-├── launch.bat           # Windows one-click launcher
-└── install_gpu.bat      # GPU setup script
+├── main.py              # Main FastAPI orchestration
+├── rag_engine.py        # Core RAG logic, chunking, & LLM communication
+├── chroma_store.py      # Vector DB interaction layer
+├── config.py            # Strongly-typed configuration system
+├── requirements.txt     # Python environment requirements
+├── frontend/            # Dedicated UI dashboard logic
+├── docker-compose.yml   # Multi-service container orchestration
+├── Dockerfile           # Optimized backend image
+└── launch.bat           # Robust one-click installation & launcher
 ```
 
 ---
 
-## License
+## 🤝 Contributing
 
-Distributed under the MIT License. See `LICENSE` for more information.
-
----
-
-## Contributing
-
-Contributions are welcome. Please open an issue or submit a pull request.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
+Contributions are always welcome. Whether it is fixing bugs, adding new features, or improving documentation:
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
----
+## 📝 License
 
-Developed by [guissii](https://github.com/guissii)
+Distributed under the MIT License. See `LICENSE` for more detailed information.
+
+---
+<div align="center">
+  <b>Developed with ❤️ by <a href="https://github.com/guissii">guissii</a></b><br>
+  <sub>If you find this project useful, please consider giving it a ⭐ on GitHub!</sub>
+</div>

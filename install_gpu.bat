@@ -3,6 +3,7 @@ cd /d "%~dp0"
 echo ========================================================
 echo Désinstallation de la version standard (CPU) de PyTorch...
 echo ========================================================
+if exist "venv" call venv\Scripts\activate.bat
 python -m pip uninstall -y torch torchvision torchaudio
 
 echo.
